@@ -48,7 +48,7 @@ export default function Welcome({ onStart }) {
           className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10"
         >
           {[
-            { icon: '💬', title: '37 preguntas', desc: 'Rápidas y directas sobre tu negocio' },
+            { icon: '💬', title: 'Adaptado a tu sector', desc: 'Preguntas específicas para tu tipo de negocio' },
             { icon: '🔎', title: 'Diagnóstico real', desc: 'Detectamos tus fugas de tiempo y dinero' },
             { icon: '📋', title: 'Plan de acción', desc: 'Con módulos de software a medida' },
           ].map((item, i) => (
