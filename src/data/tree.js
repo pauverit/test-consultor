@@ -16,6 +16,7 @@ export const PHASES = {
   servicios:    { id: 'servicios',    label: 'Servicios Profesionales',   icon: '📋', color: 'from-blue-500 to-indigo-600', showIntro: true },
   industria:    { id: 'industria',    label: 'Industria y Fabricación',   icon: '🏭', color: 'from-slate-600 to-slate-800', showIntro: true },
   datos_empresa:{ id: 'datos_empresa',label: 'Datos de la Empresa',       icon: '📊', color: 'from-slate-400 to-slate-600', showIntro: true },
+  equipo:       { id: 'equipo',       label: 'Equipo y Procesos',         icon: '👥', color: 'from-indigo-500 to-blue-600', showIntro: true },
   facturacion:  { id: 'facturacion',  label: 'Facturación y Cobros',      icon: '💶', color: 'from-rose-500 to-pink-600', showIntro: true },
   tiempo:       { id: 'tiempo',       label: 'Tu Tiempo',                 icon: '⏱️', color: 'from-sky-500 to-cyan-600', showIntro: true },
   metricas:     { id: 'metricas',     label: 'Datos y Métricas',          icon: '📊', color: 'from-slate-700 to-slate-900', showIntro: true },
@@ -29,6 +30,7 @@ export const PHASE_DESCRIPTIONS = {
   servicios:     'Analizaremos cómo gestionas los expedientes, citas, clientes y la facturación de tus servicios.',
   industria:     'Veremos la planificación de producción, costes, calidad y materiales.',
   datos_empresa: 'Unas preguntas básicas sobre el tamaño y madurez de la empresa para contextualizar el diagnóstico.',
+  equipo:        'Cómo funciona el equipo por dentro: coordinación, comunicación interna, autonomía y los procesos del día a día.',
   facturacion:   'Ahora revisaremos el proceso de facturación y el control de cobros — una de las áreas con más fugas ocultas.',
   tiempo:        'El tiempo del empresario es el recurso más escaso. Veamos dónde se está yendo.',
   metricas:      'Por último, comprobaremos si el negocio se gestiona con datos reales o por intuición.',
@@ -1069,6 +1071,74 @@ export const NODES = {
       { value: 'mas2m',     label: '💰 Más de 2.000.000 €' },
     ],
     scoreMap: null,
+    next: 'common_herramienta_tareas',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // FASE COMÚN: EQUIPO Y PROCESOS
+  // ══════════════════════════════════════════════════════════════
+  common_herramienta_tareas: {
+    id: 'common_herramienta_tareas', phase: 'equipo', area: 'equipo',
+    question: '¿Usáis alguna herramienta para gestionar las tareas y la carga de trabajo del equipo?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software',     label: '✅ Sí, software de gestión de tareas o proyectos' },
+      { value: 'excel_lista',  label: '📋 Lista en Excel, papel o pizarra' },
+      { value: 'whatsapp',     label: '💬 WhatsApp, llamadas o de palabra' },
+    ],
+    scoreMap: { software: 3, excel_lista: 1, whatsapp: 0 },
+    next: 'common_coordinacion_equipo',
+  },
+
+  common_coordinacion_equipo: {
+    id: 'common_coordinacion_equipo', phase: 'equipo', area: 'equipo',
+    question: '¿Cómo coordinais los trabajos o proyectos activos?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software',        label: '✅ Panel o software centralizado (todos lo ven)' },
+      { value: 'reunion',         label: '📅 Reuniones periódicas + notas o email' },
+      { value: 'informal',        label: '💬 De forma informal, según va surgiendo' },
+    ],
+    scoreMap: { software: 3, reunion: 2, informal: 0 },
+    next: 'common_comunicacion_interna',
+  },
+
+  common_comunicacion_interna: {
+    id: 'common_comunicacion_interna', phase: 'equipo', area: 'equipo',
+    question: '¿Por dónde se comunica el equipo principalmente para temas de trabajo?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_empresa', label: '✅ App de empresa (Teams, Slack, plataforma interna...)' },
+      { value: 'whatsapp',    label: '💬 WhatsApp (grupos personales o de empresa)' },
+      { value: 'oral',        label: '🗣️ Presencial o llamadas de teléfono' },
+    ],
+    scoreMap: { app_empresa: 3, whatsapp: 1, oral: 1 },
+    next: 'common_procesos_documentados',
+  },
+
+  common_procesos_documentados: {
+    id: 'common_procesos_documentados', phase: 'equipo', area: 'equipo',
+    question: '¿Los procesos clave del negocio están documentados (protocolos, checklists, guías)?',
+    hint: 'Que cualquier empleado pueda seguirlos sin preguntarte', type: 'single',
+    options: [
+      { value: 'si_todos',  label: '✅ Sí, la mayoría están escritos y actualizados' },
+      { value: 'algunos',   label: '⚡ Solo los más críticos, el resto no' },
+      { value: 'no',        label: '❌ No, todo está en la cabeza de las personas' },
+    ],
+    scoreMap: { si_todos: 3, algunos: 1, no: 0 },
+    next: 'common_autonomia_equipo',
+  },
+
+  common_autonomia_equipo: {
+    id: 'common_autonomia_equipo', phase: 'equipo', area: 'equipo',
+    question: '¿Puede el equipo resolver incidencias del día a día sin necesitar tu intervención?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si_mayoria',  label: '✅ Sí, en la mayoría de casos actúan solos' },
+      { value: 'depende',     label: '⚡ Depende del problema, a veces sí y a veces no' },
+      { value: 'no_siempre',  label: '❌ No, casi siempre me consultan a mí' },
+    ],
+    scoreMap: { si_mayoria: 3, depende: 1, no_siempre: 0 },
     next: 'common_facturacion_como',
   },
 
@@ -1174,6 +1244,34 @@ export const NODES = {
       { value: 'casi_nada', label: '✅ Casi nada, está bien delegado' },
     ],
     scoreMap: { muchas: 0, pocas: 1, casi_nada: 3 },
+    next: 'common_interrupciones',
+  },
+
+  common_interrupciones: {
+    id: 'common_interrupciones', phase: 'tiempo', area: 'tiempo',
+    question: '¿Cuántas veces al día te interrumpe el equipo para pedirte decisiones o resolver dudas?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'casi_nunca', label: '✅ Casi nunca — el equipo funciona solo' },
+      { value: 'algunas',    label: '⚡ Algunas veces (3-6 veces al día)' },
+      { value: 'muchas',     label: '🚨 Constantemente — soy el punto de resolución de todo' },
+    ],
+    scoreMap: { casi_nunca: 3, algunas: 1, muchas: 0 },
+    next: 'common_tarea_repetida',
+  },
+
+  common_tarea_repetida: {
+    id: 'common_tarea_repetida', phase: 'tiempo', area: 'tiempo',
+    question: '¿Cuál es la tarea que MÁS tiempo te consume cada semana?',
+    hint: 'La que más veces repites o más horas te quita personalmente', type: 'single',
+    options: [
+      { value: 'presupuestos',      label: '📄 Elaborar y revisar presupuestos u ofertas' },
+      { value: 'admin_burocracia',  label: '📋 Papeleo, facturas y trámites administrativos' },
+      { value: 'coordinacion',      label: '👥 Coordinar y supervisar al equipo' },
+      { value: 'atencion_cliente',  label: '📞 Atender consultas y llamadas de clientes' },
+      { value: 'buscar_docs',       label: '🔍 Buscar información, documentos o datos' },
+    ],
+    scoreMap: { presupuestos: 1, admin_burocracia: 1, coordinacion: 0, atencion_cliente: 1, buscar_docs: 0 },
     next: 'common_panel_kpi',
   },
 
@@ -1212,6 +1310,19 @@ export const NODES = {
       { value: 'si_exacto', label: '✅ Sí, lo tengo claro' },
       { value: 'aprox',     label: '⚡ Más o menos, por intuición' },
       { value: 'no',        label: '❌ No lo sé' },
+    ],
+    scoreMap: { si_exacto: 3, aprox: 1, no: 0 },
+    next: 'common_coste_captacion',
+  },
+
+  common_coste_captacion: {
+    id: 'common_coste_captacion', phase: 'metricas', area: 'metricas',
+    question: '¿Sabéis cuánto os cuesta captar un nuevo cliente (publicidad, comerciales, tiempo)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si_exacto', label: '✅ Sí, lo medimos y lo optimizamos' },
+      { value: 'aprox',     label: '⚡ Más o menos lo sabemos' },
+      { value: 'no',        label: '❌ No lo medimos' },
     ],
     scoreMap: { si_exacto: 3, aprox: 1, no: 0 },
     next: null, // ← FIN → Mostrar resultados

@@ -6,6 +6,7 @@ export const AREAS = [
   { id: 'presupuestacion', label: 'Presupuestación',      icon: '📄' },
   { id: 'operaciones',     label: 'Operaciones',          icon: '⚙️' },
   { id: 'inventario',      label: 'Inventario y Compras', icon: '📦' },
+  { id: 'equipo',          label: 'Equipo y Procesos',    icon: '👥' },
   { id: 'facturacion',     label: 'Facturación y Cobros', icon: '💶' },
   { id: 'tiempo',          label: 'Gestión del Tiempo',   icon: '⏱️' },
   { id: 'metricas',        label: 'Datos y Métricas',     icon: '📊' },
@@ -285,6 +286,74 @@ const LEAK_RULES = [
     impact: 'alto', area: 'operaciones',
     euros: 'Coste directo: material rechazado + reclamaciones + pérdida de imagen',
     trigger: (ans) => ans.sector === 'industria' && ans.ind_control_calidad === 'informal',
+  },
+  // ── EQUIPO Y PROCESOS ────────────────────────────────────────────────────────
+  {
+    id: 'equipo_sin_herramienta',
+    title: 'Gestión de tareas por WhatsApp o de palabra',
+    description: 'Sin herramienta de gestión de tareas, las responsabilidades se pierden, se duplica trabajo y es imposible ver la carga real del equipo.',
+    impact: 'alto', area: 'equipo',
+    euros: 'Coste oculto: tareas olvidadas, duplicadas o mal asignadas que consumen horas y generan errores',
+    trigger: (ans) => ans.common_herramienta_tareas === 'whatsapp',
+  },
+  {
+    id: 'coordinacion_informal',
+    title: 'Coordinación de proyectos sin panel centralizado',
+    description: 'Sin visión global de todos los proyectos activos, los recursos se solapan y los cuellos de botella no se detectan hasta que ya hay un problema.',
+    impact: 'medio', area: 'equipo',
+    euros: 'Impacto: retrasos, solapamiento de recursos y decisiones tomadas sin información completa',
+    trigger: (ans) => ans.common_coordinacion_equipo === 'informal',
+  },
+  {
+    id: 'comunicacion_whatsapp',
+    title: 'Comunicación interna por WhatsApp personal: riesgo y pérdida de información',
+    description: 'WhatsApp no está diseñado para uso empresarial: no hay archivo histórico fiable, mezcla personal y profesional, y no permite control ni búsqueda eficiente.',
+    impact: 'medio', area: 'equipo',
+    euros: 'Riesgo: información crítica perdida en chats, sin posibilidad de auditoría',
+    trigger: (ans) => ans.common_comunicacion_interna === 'whatsapp',
+  },
+  {
+    id: 'procesos_sin_documentar',
+    title: 'Procesos clave solo en la cabeza de las personas',
+    description: 'Si los procesos no están documentados, cada incorporación requiere formación larga, los errores se repiten y el negocio depende de personas específicas.',
+    impact: 'alto', area: 'equipo',
+    euros: 'Coste de dependencia: tiempo de formación + errores evitables + riesgo si una persona clave se va',
+    trigger: (ans) => ans.common_procesos_documentados === 'no',
+  },
+  {
+    id: 'equipo_sin_autonomia',
+    title: 'Equipo sin autonomía: el empresario resuelve todo',
+    description: 'Si el equipo no puede actuar sin consultarte, no puedes delegar realmente. Cada interrupción rompe el flujo del responsable más valioso del negocio.',
+    impact: 'alto', area: 'equipo',
+    euros: 'Coste directo: el tiempo del empresario es el más caro — no puede dedicarse a hacer crecer el negocio',
+    trigger: (ans) => ans.common_autonomia_equipo === 'no_siempre',
+  },
+  {
+    id: 'interrupciones_continuas',
+    title: 'Interrupciones constantes que bloquean al responsable',
+    description: 'Más de 6 interrupciones al día son más de 1 hora perdida en cambios de contexto. El trabajo de alto valor queda aplazado indefinidamente.',
+    impact: 'alto', area: 'tiempo',
+    euros: 'Coste estimado: +1-2 horas diarias de trabajo de alto valor bloqueado por interrupciones',
+    trigger: (ans) => ans.common_interrupciones === 'muchas',
+  },
+  {
+    id: 'tarea_clave_manual',
+    title: 'Tarea de alto volumen sin automatizar',
+    description: 'La tarea que más tiempo consume es candidata principal a automatización. Reducir su tiempo a la mitad libera horas semanales para lo que realmente importa.',
+    impact: 'medio', area: 'tiempo',
+    euros: 'Oportunidad: automatizar la principal tarea repetitiva puede liberar 3-8 horas semanales',
+    trigger: (ans) =>
+      ans.common_tarea_repetida === 'admin_burocracia' ||
+      ans.common_tarea_repetida === 'buscar_docs' ||
+      ans.common_tarea_repetida === 'coordinacion',
+  },
+  {
+    id: 'sin_coste_captacion',
+    title: 'Sin medir cuánto cuesta captar un cliente',
+    description: 'Si no sabes cuánto cuesta captar un cliente, no puedes saber si tu inversión en marketing y ventas es rentable ni dónde optimizarla.',
+    impact: 'medio', area: 'metricas',
+    euros: 'Riesgo: inversión en captación sin retorno medido — puede costar más que el margen del cliente',
+    trigger: (ans) => ans.common_coste_captacion === 'no',
   },
   // ── COMÚN A TODOS ────────────────────────────────────────────────────────────
   {
