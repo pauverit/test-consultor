@@ -46,8 +46,8 @@ export default function App() {
   }
 
   // ─── SIGUIENTE ───────────────────────────────────────────────────────────────
-  function handleNext() {
-    const value     = answers[currentNodeId]
+  function handleNext(valueOverride) {
+    const value     = valueOverride ?? answers[currentNodeId]
     const nextId    = getNextNodeId(currentNode, value)
 
     setDirection(1)

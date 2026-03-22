@@ -14,8 +14,8 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
 
   function handleSingle(optVal) {
     onChange(optVal)
-    // Auto-avance tras breve delay para que se vea la selección
-    setTimeout(() => onNext(), 300)
+    // Pasamos el valor directamente para evitar closure obsoleta en React
+    setTimeout(() => onNext(optVal), 300)
   }
 
   function toggleMulti(optVal) {
