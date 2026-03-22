@@ -1057,7 +1057,27 @@ export const NODES = {
       { value: 'mas50', label: '🏢 Más de 50 personas' },
     ],
     scoreMap: null,
-    next: 'common_facturacion_anual',
+    routes: {
+      solo:    'common_facturacion_anual_solo',
+      '2a5':   'common_facturacion_anual',
+      '6a15':  'common_facturacion_anual',
+      '16a50': 'common_facturacion_anual',
+      'mas50': 'common_facturacion_anual',
+    },
+  },
+
+  common_facturacion_anual_solo: {
+    id: 'common_facturacion_anual_solo', phase: 'datos_empresa', area: null,
+    question: '¿Cuál es la facturación anual aproximada?',
+    hint: 'No necesita ser exacta, es orientativo', type: 'single',
+    options: [
+      { value: 'menos100k', label: '💰 Menos de 100.000 €' },
+      { value: '100a500k',  label: '💰 100.000 € – 500.000 €' },
+      { value: '500a2m',    label: '💰 500.000 € – 2.000.000 €' },
+      { value: 'mas2m',     label: '💰 Más de 2.000.000 €' },
+    ],
+    scoreMap: null,
+    next: 'common_facturacion_como',
   },
 
   common_facturacion_anual: {
@@ -1249,12 +1269,12 @@ export const NODES = {
 
   common_interrupciones: {
     id: 'common_interrupciones', phase: 'tiempo', area: 'tiempo',
-    question: '¿Cuántas veces al día te interrumpe el equipo para pedirte decisiones o resolver dudas?',
-    hint: null, type: 'single',
+    question: '¿Cuántas veces al día recibes interrupciones que te impiden concentrarte en trabajo importante?',
+    hint: 'Llamadas, consultas, WhatsApp, urgencias inesperadas...', type: 'single',
     options: [
-      { value: 'casi_nunca', label: '✅ Casi nunca — el equipo funciona solo' },
-      { value: 'algunas',    label: '⚡ Algunas veces (3-6 veces al día)' },
-      { value: 'muchas',     label: '🚨 Constantemente — soy el punto de resolución de todo' },
+      { value: 'casi_nunca', label: '✅ Pocas — puedo trabajar con concentración' },
+      { value: 'algunas',    label: '⚡ Algunas (3-6 veces al día)' },
+      { value: 'muchas',     label: '🚨 Constantemente — raramente termino algo sin interrupciones' },
     ],
     scoreMap: { casi_nunca: 3, algunas: 1, muchas: 0 },
     next: 'common_tarea_repetida',

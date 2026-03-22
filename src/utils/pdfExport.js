@@ -2,6 +2,17 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { getScoreLabel, getGlobalLabel } from './diagnose.js'
 
+// jsPDF (Helvetica) no soporta emojis — los eliminamos antes de escribir
+function t(str) {
+  if (!str) return ''
+  return str
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')  // emojis amplio rango
+    .replace(/[\u2600-\u27BF]/gu, '')          // símbolos misceláneos
+    .replace(/[\uFE00-\uFE0F]/gu, '')          // variation selectors
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
 const BRAND_BLUE = [37, 99, 235]
 const DARK = [15, 23, 42]
 const GRAY = [100, 116, 139]
@@ -34,16 +45,16 @@ export function exportPDF(report, companyName = '') {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(28)
   doc.setTextColor(255, 255, 255)
-  doc.text('DIAGNÓSTICO EMPRESARIAL', W / 2, 30, { align: 'center' })
+  doc.text('DIAGNOSTICO EMPRESARIAL', W / 2, 30, { align: 'center' })
 
   doc.setFontSize(14)
   doc.setFont('helvetica', 'normal')
-  doc.text('Informe de Optimización y Oportunidades', W / 2, 42, { align: 'center' })
+  doc.text('Informe de Optimizacion y Oportunidades', W / 2, 42, { align: 'center' })
 
   if (companyName) {
     doc.setFontSize(18)
     doc.setFont('helvetica', 'bold')
-    doc.text(companyName, W / 2, 60, { align: 'center' })
+    doc.text(t(companyName), W / 2, 60, { align: 'center' })
   }
 
   doc.setFontSize(10)
@@ -75,7 +86,7 @@ export function exportPDF(report, companyName = '') {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(...GRAY)
-  doc.text(`Se han detectado ${report.leaks.length} áreas de mejora y ${report.modules.length} módulos recomendados`, 80, y + 23)
+  doc.text(`Se han detectado ${report.leaks.length} areas de mejora y ${report.modules.length} modulos recomendados`, 80, y + 23)
 
   y += 45
 
@@ -83,13 +94,13 @@ export function exportPDF(report, companyName = '') {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
   doc.setTextColor(...DARK)
-  doc.text('Puntuación por Área', 15, y)
+  doc.text('Puntuacion por Area', 15, y)
   y += 8
 
   const areaRows = report.areas.map(area => {
     const meta = getScoreLabel(area.score)
     return [
-      area.icon + ' ' + area.label,
+      t(area.label),
       `${area.score}/100`,
       meta.label,
     ]
@@ -97,7 +108,7 @@ export function exportPDF(report, companyName = '') {
 
   autoTable(doc, {
     startY: y,
-    head: [['Área', 'Puntuación', 'Estado']],
+    head: [['Area', 'Puntuacion', 'Estado']],
     body: areaRows,
     theme: 'striped',
     headStyles: { fillColor: BRAND_BLUE, textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 10 },
@@ -131,6 +142,7 @@ export function exportPDF(report, companyName = '') {
   doc.setFontSize(14)
   doc.setTextColor(...DARK)
   doc.text('Fugas de Tiempo y Dinero Detectadas', 15, y)
+
   y += 8
 
   if (report.leaks.length === 0) {
@@ -160,18 +172,18 @@ export function exportPDF(report, companyName = '') {
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(10)
       doc.setTextColor(...DARK)
-      doc.text(`${i + 1}. ${leak.title}`, 42, y + 9)
+      doc.text(t(`${i + 1}. ${leak.title}`), 42, y + 9)
 
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(9)
       doc.setTextColor(...GRAY)
-      const descLines = doc.splitTextToSize(leak.description, W - 60)
+      const descLines = doc.splitTextToSize(t(leak.description), W - 60)
       doc.text(descLines, 42, y + 16)
 
       doc.setFont('helvetica', 'italic')
       doc.setFontSize(8)
       doc.setTextColor(...BRAND_BLUE)
-      doc.text(leak.euros, 42, y + 27)
+      doc.text(t(leak.euros), 42, y + 27)
 
       y += 35
     })
@@ -183,7 +195,7 @@ export function exportPDF(report, companyName = '') {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
   doc.setTextColor(...DARK)
-  doc.text('Módulos SaaS Recomendados', 15, y)
+  doc.text('Modulos SaaS Recomendados', 15, y)
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
@@ -200,12 +212,12 @@ export function exportPDF(report, companyName = '') {
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(11)
     doc.setTextColor(...BRAND_BLUE)
-    doc.text(`${i + 1}. ${mod.icon} ${mod.name}`, 20, y + 10)
+    doc.text(t(`${i + 1}. ${mod.name}`), 20, y + 10)
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(9)
     doc.setTextColor(...GRAY)
-    const descLines = doc.splitTextToSize(mod.description, W - 45)
+    const descLines = doc.splitTextToSize(t(mod.description), W - 45)
     doc.text(descLines, 20, y + 18)
 
     y += 37
@@ -217,15 +229,15 @@ export function exportPDF(report, companyName = '') {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
   doc.setTextColor(...DARK)
-  doc.text('Próximos Pasos Recomendados', 15, y)
+  doc.text('Proximos Pasos Recomendados', 15, y)
   y += 10
 
   const steps = [
-    '1. Revisad este informe junto con vuestro consultor tecnológico.',
-    '2. Priorizad las fugas críticas — son pérdida de dinero real hoy.',
-    '3. Empezad por el módulo número 1 de la lista recomendada.',
-    '4. Medid el antes y el después para cuantificar el retorno.',
-    '5. Revisad el diagnóstico cada 6 meses para detectar nuevas mejoras.',
+    '1. Revisa este informe con tu consultor tecnologico.',
+    '2. Prioriza las fugas criticas — son perdida de dinero real hoy.',
+    '3. Empieza por el modulo numero 1 de la lista recomendada.',
+    '4. Mide el antes y el despues para cuantificar el retorno.',
+    '5. Revisa el diagnostico cada 6 meses para detectar nuevas mejoras.',
   ]
 
   steps.forEach(step => {
@@ -243,7 +255,7 @@ export function exportPDF(report, companyName = '') {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(...GRAY)
-    doc.text(`Consultor Digital — Diagnóstico Empresarial · Página ${i} de ${pageCount}`, W / 2, H - 8, { align: 'center' })
+    doc.text(`Consultor Digital - Diagnostico Empresarial · Pagina ${i} de ${pageCount}`, W / 2, H - 8, { align: 'center' })
     doc.setDrawColor(226, 232, 240)
     doc.line(15, H - 13, W - 15, H - 13)
   }
