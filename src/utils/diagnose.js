@@ -201,6 +201,100 @@ const LEAK_RULES = [
     euros: 'Pérdida oculta: clientes que generan costes superiores a sus ingresos',
     trigger: (ans) => ans.common_cliente_rentable === 'no',
   },
+  // ── HOSTELERÍA ──────────────────────────────────────────────────────────────
+  {
+    id: 'hoste_mermas_sin_control',
+    title: 'Mermas de producto sin controlar',
+    description: 'Sin controlar caducidades y desperdicios, el coste de producto real puede ser un 20-30% más alto que el teórico de los escandallos.',
+    impact: 'alto', area: 'inventario',
+    euros: 'Pérdida estimada: 8-20% del coste de producto en mermas no registradas',
+    trigger: (ans) => ans.sector === 'hosteleria' && ans.hoste_mermas === 'no',
+  },
+  {
+    id: 'hoste_tpv_ineficiente',
+    title: 'TPV básico: sin control de mesas, cocina ni turnos',
+    description: 'Un TPV que solo cobra no gestiona mesas, no manda comandas a cocina y no permite analizar ventas por producto o turno.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Impacto: errores de comanda, servicio más lento y sin datos de rentabilidad por plato',
+    trigger: (ans) => ans.sector === 'hosteleria' && (ans.hoste_tpv === 'basico' || ans.hoste_tpv === 'manual'),
+  },
+  {
+    id: 'hoste_personal_oral',
+    title: 'Turnos del personal gestionados de palabra o WhatsApp',
+    description: 'Sin cuadrante digital los errores de turno, los cambios de última hora y los conflictos de horario son inevitables.',
+    impact: 'medio', area: 'tiempo',
+    euros: 'Coste oculto: horas de gestión de horarios + conflictos y errores de turno evitables',
+    trigger: (ans) => ans.sector === 'hosteleria' && ans.hoste_personal === 'oral',
+  },
+  // ── SERVICIOS PROFESIONALES ─────────────────────────────────────────────────
+  {
+    id: 'serv_expedientes_papel',
+    title: 'Expedientes en papel o carpetas del PC: información dispersa',
+    description: 'Sin software de gestión documental cada búsqueda de un expediente cuesta minutos. Con cientos de clientes, eso son horas a la semana.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Coste estimado: 15-30 min por búsqueda × volumen de clientes activos',
+    trigger: (ans) => ans.serv_expedientes === 'papel' || ans.serv_expedientes === 'carpetas_pc',
+  },
+  {
+    id: 'serv_clientes_llaman',
+    title: 'Clientes que llaman para saber el estado de sus gestiones',
+    description: 'Si los clientes necesitan llamar para saber cómo va su expediente, tu equipo pierde tiempo en llamadas que un portal de cliente automatizaría.',
+    impact: 'medio', area: 'operaciones',
+    euros: 'Coste estimado: 10-20 min por llamada × número de consultas de estado al mes',
+    trigger: (ans) => ans.serv_comunicacion_estado === 'esperan',
+  },
+  {
+    id: 'serv_sin_agenda_online',
+    title: 'Sin agenda online: citas solo por teléfono',
+    description: 'Gestionar citas por teléfono consume tiempo y limita la captación a horario de oficina. Los clientes esperan poder reservar 24/7.',
+    impact: 'medio', area: 'ventas_crm',
+    euros: 'Citas perdidas fuera de horario + tiempo de personal en gestión de agenda',
+    trigger: (ans) =>
+      (ans.sector === 'servicios' && ans.serv_agenda === 'si_manual') ||
+      ans.serv_agenda_clinica === 'manual',
+  },
+  {
+    id: 'serv_sin_recordatorios_cita',
+    title: 'Sin recordatorios automáticos: no-shows que cuestan dinero',
+    description: 'Las citas olvidadas generan huecos vacíos en la agenda. Un recordatorio automático reduce los no-shows hasta un 70%.',
+    impact: 'medio', area: 'ventas_crm',
+    euros: 'Pérdida estimada: 15-30% de citas perdidas por olvido que podrían cubrirse con otra cita',
+    trigger: (ans) => ans.serv_recordatorios_cita === 'no',
+  },
+  // ── INDUSTRIA ───────────────────────────────────────────────────────────────
+  {
+    id: 'ind_sin_costes_produccion',
+    title: 'Fabricación sin conocer el coste real por pedido',
+    description: 'Fabricar sin calcular el coste exacto de cada pedido hace imposible saber si cada trabajo genera margen positivo o negativo.',
+    impact: 'critico', area: 'operaciones',
+    euros: 'Riesgo directo: pedidos que se fabrican generando pérdidas sin que nadie lo detecte',
+    trigger: (ans) => ans.sector === 'industria' && ans.ind_costes_produccion === 'no',
+  },
+  {
+    id: 'ind_planificacion_informal',
+    title: 'Producción planificada de cabeza: retrasos inevitables',
+    description: 'Sin sistema de planificación de producción, los recursos se solapan, los retrasos se acumulan y la capacidad real de la planta se desconoce.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Impacto: retrasos de entrega, penalizaciones contractuales y coste de urgencias',
+    trigger: (ans) => ans.sector === 'industria' && ans.ind_planificacion === 'memoria',
+  },
+  {
+    id: 'ind_calidad_informal',
+    title: 'Control de calidad solo por revisión visual: rechazos y reclamaciones',
+    description: 'Sin proceso formal de calidad los defectos se detectan tarde, los rechazos de clientes aumentan y es imposible analizar las causas raíz.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Coste directo: material rechazado + reclamaciones + pérdida de imagen',
+    trigger: (ans) => ans.sector === 'industria' && ans.ind_control_calidad === 'informal',
+  },
+  // ── COMÚN A TODOS ────────────────────────────────────────────────────────────
+  {
+    id: 'facturacion_en_excel',
+    title: 'Facturación en Excel: riesgo de errores y sin control de numeración',
+    description: 'Facturar en Excel genera errores en numeración, dificulta el control de series y no permite integración con banco ni automatización de cobros.',
+    impact: 'medio', area: 'facturacion',
+    euros: 'Riesgo: errores en facturas, problemas con Hacienda y tiempo perdido en cierres contables',
+    trigger: (ans) => ans.common_facturacion_como === 'excel',
+  },
 ]
 
 function calcAreaScores(answers) {

@@ -54,7 +54,11 @@ export default function App() {
 
     // FIN DEL ÁRBOL
     if (!nextId) {
-      const r = generateReport({ ...answers })
+      // Incluimos la última respuesta que aún no está en el estado (closure obsoleta)
+      const finalAnswers = valueOverride
+        ? { ...answers, [currentNodeId]: valueOverride }
+        : { ...answers }
+      const r = generateReport(finalAnswers)
       setReport(r)
       setScreen('results')
       return

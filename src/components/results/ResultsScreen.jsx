@@ -5,6 +5,58 @@ import LeaksList from './LeaksList.jsx'
 import ModuleCards from './ModuleCards.jsx'
 import { exportPDF } from '../../utils/pdfExport.js'
 
+const SECTOR_LABELS = {
+  reformas:   'construcción y reformas',
+  comercio:   'comercio y distribución',
+  tecnologia: 'tecnología y soporte técnico',
+  hosteleria: 'hostelería y restauración',
+  servicios:  'servicios profesionales',
+  industria:  'industria y fabricación',
+}
+
+const EMPLEADOS_LABELS = {
+  solo:  'solo tú',
+  '2a5':   '2 a 5 personas',
+  '6a15':  '6 a 15 personas',
+  '16a50': '16 a 50 personas',
+  mas50:   'más de 50 personas',
+}
+
+const FACTURACION_LABELS = {
+  menos100k: 'menos de 100.000 €',
+  '100a500k': 'entre 100.000 y 500.000 €',
+  '500a2m': 'entre 500.000 y 2.000.000 €',
+  mas2m: 'más de 2.000.000 €',
+}
+
+function getPersonalizedIntro(report) {
+  const sector = SECTOR_LABELS[report.sector] || 'tu sector'
+  const empleados = EMPLEADOS_LABELS[report.answers?.common_empleados]
+  const facturacion = FACTURACION_LABELS[report.answers?.common_facturacion_anual]
+  const criticalAreas = report.areas
+    .filter(a => a.score !== null && a.score < 50)
+    .map(a => a.label.toLowerCase())
+
+  let intro = `Tu empresa de ${sector}`
+  if (empleados) intro += ` con ${empleados}`
+  if (facturacion) intro += ` y facturación de ${facturacion}`
+  intro += ` ha obtenido una puntuación de ${report.globalScore}/100.`
+
+  if (report.leaks.length === 0) {
+    intro += ' El diagnóstico no detecta fugas significativas — tu operación está bien gestionada.'
+  } else if (report.globalScore < 40) {
+    intro += ` Hemos detectado ${report.leaks.length} fugas activas que están drenando rentabilidad y tiempo de forma silenciosa.`
+  } else {
+    intro += ` Hemos encontrado ${report.leaks.length} áreas de mejora con impacto directo en tu negocio.`
+  }
+
+  if (criticalAreas.length > 0) {
+    intro += ` Las áreas más críticas son ${criticalAreas.slice(0, 3).join(', ')}.`
+  }
+
+  return intro
+}
+
 const TABS = [
   { id: 'resumen',  label: '📊 Resumen',     desc: 'Puntuación global' },
   { id: 'fugas',    label: '🚨 Fugas',        desc: 'Problemas detectados' },
@@ -76,6 +128,14 @@ export default function ResultsScreen({ report, onRestart }) {
         >
           {activeTab === 'resumen' && (
             <div className="space-y-6">
+              {/* Intro personalizado */}
+              <div className="bg-white rounded-2xl border-l-4 border-brand-500 shadow-sm px-5 py-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl mt-0.5">🎯</span>
+                  <p className="text-slate-700 leading-relaxed text-sm">{getPersonalizedIntro(report)}</p>
+                </div>
+              </div>
+
               <ScoreSection globalScore={report.globalScore} areas={report.areas} />
 
               {/* Resumen rápido */}
