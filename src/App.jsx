@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { NODES, PHASES, START_NODE, getNextNodeId } from './data/tree.js'
 import { generateReport } from './utils/diagnose.js'
@@ -8,106 +8,41 @@ import QuestionCard from './components/QuestionCard.jsx'
 import ProgressBar from './components/ProgressBar.jsx'
 import ResultsScreen from './components/results/ResultsScreen.jsx'
 
-// Estimación de preguntas totales por camino (para la barra de progreso)
 const ESTIMATED_TOTAL = 28
 
 export default function App() {
-  const [screen, setScreen]           = useState('welcome')    // 'welcome' | 'phase-intro' | 'question' | 'results'
-  const [path, setPath]               = useState([START_NODE]) // historial de IDs visitados
-  const [answers, setAnswers]         = useState({})
-  const [pendingPhase, setPendingPhase] = useState(null)       // fase que vamos a mostrar en intro
-  const [direction, setDirection]     = useState(1)
-  const [report, setReport]           = useState(null)
+  const [screen, setScreen]             = useState('welcome')
+  const [path, setPath]                 = useState([START_NODE])
+  const [answers, setAnswers]           = useState({})
+  const [pendingPhase, setPendingPhase] = useState(null)
+  const [direction, setDirection]       = useState(1)
+  const [report, setReport]             = useState(null)
 
-  const currentNodeId  = path[path.length - 1]
-  const currentNode    = NODES[currentNodeId]
-  const currentAnswer  = answers[currentNodeId]
-  const progress       = Math.min(Math.round((path.length / ESTIMATED_TOTAL) * 100), 95)
+  // Ref para el timer de auto-avance (cancelar si el usuario vuelve atrás)
+  const navTimerRef = useRef(null)
+  // Ref siempre actualizado de answers para acceder al estado más reciente dentro de timers
+  const answersRef  = useRef(answers)
+  answersRef.current = answers
 
-  // Refs siempre actualizados para usarlos dentro de timers
-  const currentNodeRef   = useRef(currentNode)
-  const currentNodeIdRef = useRef(currentNodeId)
-  const answersRef       = useRef(answers)
-  currentNodeRef.current   = currentNode
-  currentNodeIdRef.current = currentNodeId
-  answersRef.current       = answers
+  const currentNodeId = path[path.length - 1]
+  const currentNode   = NODES[currentNodeId]
+  const currentAnswer = answers[currentNodeId]
+  const progress      = Math.min(Math.round((path.length / ESTIMATED_TOTAL) * 100), 95)
 
-  // Auto-avance para preguntas single
-  // Se ejecuta cuando cambia la respuesta de la pregunta actual
-  useEffect(() => {
-    if (!currentNode || currentNode.type !== 'single') return
-    const capturedValue  = answers[currentNodeId]   // valor que disparó el efecto
-    const capturedNodeId = currentNodeId             // nodo en el que estamos ahora
-    if (!capturedValue) return
-
-    const timer = setTimeout(() => {
-      // Si el usuario ya navegó antes de que el timer dispare, cancelamos
-      if (currentNodeIdRef.current !== capturedNodeId) return
-
-      const node   = currentNodeRef.current
-      const nextId = getNextNodeId(node, capturedValue)
-
-      if (!nextId) {
-        const r = generateReport({ ...answersRef.current })
-        setReport(r)
-        setScreen('results')
-        return
-      }
-
-      const nextNode     = NODES[nextId]
-      const currentPhase = node.phase
-      const nextPhase    = nextNode?.phase
-
-      if (nextPhase && nextPhase !== currentPhase && PHASES[nextPhase]?.showIntro) {
-        setPendingPhase(nextPhase)
-        setPath(prev => [...prev, nextId])
-        setScreen('phase-intro')
-      } else {
-        setPath(prev => [...prev, nextId])
-      }
-    }, 300)
-
-    return () => clearTimeout(timer)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers[currentNodeId]])
-
-  // ─── INICIO ─────────────────────────────────────────────────────────────────
-  function handleStart() {
-    const firstPhase = PHASES[currentNode.phase]
-    if (firstPhase?.showIntro) {
-      setPendingPhase(currentNode.phase)
-      setScreen('phase-intro')
-    } else {
-      setScreen('question')
-    }
-  }
-
-  // ─── CONTINUAR DESDE PHASE INTRO ────────────────────────────────────────────
-  function handlePhaseIntroContinue() {
-    setScreen('question')
-  }
-
-  // ─── GUARDAR RESPUESTA ───────────────────────────────────────────────────────
-  function handleChange(value) {
-    setAnswers(prev => ({ ...prev, [currentNodeId]: value }))
-  }
-
-  // ─── SIGUIENTE (solo para preguntas multi — las single usan el useEffect) ────
-  function handleNext() {
-    const value  = answers[currentNodeId]
-    const nextId = getNextNodeId(currentNode, value)
-
+  // ─── NAVEGACIÓN (función central, sin closures problemáticas) ─────────────
+  function navigateFrom(node, value) {
+    const nextId = getNextNodeId(node, value)
     setDirection(1)
 
     if (!nextId) {
-      const r = generateReport({ ...answers })
+      const r = generateReport({ ...answersRef.current })
       setReport(r)
       setScreen('results')
       return
     }
 
     const nextNode     = NODES[nextId]
-    const currentPhase = currentNode.phase
+    const currentPhase = node.phase
     const nextPhase    = nextNode?.phase
 
     if (nextPhase && nextPhase !== currentPhase && PHASES[nextPhase]?.showIntro) {
@@ -119,8 +54,58 @@ export default function App() {
     }
   }
 
-  // ─── ATRÁS ───────────────────────────────────────────────────────────────────
+  // ─── INICIO ───────────────────────────────────────────────────────────────
+  function handleStart() {
+    const firstPhase = PHASES[currentNode.phase]
+    if (firstPhase?.showIntro) {
+      setPendingPhase(currentNode.phase)
+      setScreen('phase-intro')
+    } else {
+      setScreen('question')
+    }
+  }
+
+  // ─── PHASE INTRO ──────────────────────────────────────────────────────────
+  function handlePhaseIntroContinue() {
+    setScreen('question')
+  }
+
+  // ─── GUARDAR RESPUESTA ────────────────────────────────────────────────────
+  // Para preguntas single: guarda y auto-avanza tras 300ms
+  // Para preguntas multi: solo guarda (el usuario pulsa Continuar)
+  function handleChange(value) {
+    setAnswers(prev => ({ ...prev, [currentNodeId]: value }))
+    answersRef.current = { ...answersRef.current, [currentNodeId]: value }
+
+    if (currentNode?.type === 'single') {
+      // Capturamos node y value AHORA (valores del render actual, siempre correctos)
+      const capturedNode  = currentNode
+      const capturedValue = value
+
+      // Cancelar cualquier timer anterior
+      if (navTimerRef.current) clearTimeout(navTimerRef.current)
+
+      navTimerRef.current = setTimeout(() => {
+        navTimerRef.current = null
+        navigateFrom(capturedNode, capturedValue)
+      }, 300)
+    }
+  }
+
+  // ─── SIGUIENTE (preguntas multi) ──────────────────────────────────────────
+  function handleNext() {
+    if (navTimerRef.current) clearTimeout(navTimerRef.current)
+    navigateFrom(currentNode, answers[currentNodeId])
+  }
+
+  // ─── ATRÁS ────────────────────────────────────────────────────────────────
   function handleBack() {
+    // Cancelar auto-avance si el usuario va atrás antes de los 300ms
+    if (navTimerRef.current) {
+      clearTimeout(navTimerRef.current)
+      navTimerRef.current = null
+    }
+
     setDirection(-1)
 
     if (path.length <= 1) {
@@ -128,17 +113,13 @@ export default function App() {
       return
     }
 
-    // Quitar el nodo actual del path
-    const newPath = path.slice(0, -1)
-    setPath(newPath)
-
-    // Si volvemos a una pantalla con phase-intro, simplemente mostramos la pregunta anterior
-    // (no volvemos a mostrar el phase-intro al ir atrás)
+    setPath(path.slice(0, -1))
     setScreen('question')
   }
 
-  // ─── REINICIAR ───────────────────────────────────────────────────────────────
+  // ─── REINICIAR ────────────────────────────────────────────────────────────
   function handleRestart() {
+    if (navTimerRef.current) clearTimeout(navTimerRef.current)
     setScreen('welcome')
     setPath([START_NODE])
     setAnswers({})
@@ -147,7 +128,7 @@ export default function App() {
     setPendingPhase(null)
   }
 
-  // ─── RENDER ──────────────────────────────────────────────────────────────────
+  // ─── RENDER ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
       <AnimatePresence mode="wait">
