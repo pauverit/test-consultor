@@ -1,18 +1,8 @@
 import { motion } from 'framer-motion'
-import { PHASES } from '../data/questions.js'
-
-const PHASE_DESCRIPTIONS = {
-  perfil:       'Cuéntanos un poco sobre tu empresa para que podamos adaptar el diagnóstico a tu realidad.',
-  ventas:       'Analizaremos cómo entran los clientes y cómo gestionáis las oportunidades de venta.',
-  operaciones:  'Veremos cómo planificáis y ejecutáis los trabajos o proyectos del día a día.',
-  inventario:   'Examinaremos vuestro control de compras, materiales y proveedores.',
-  facturacion:  'Revisaremos el proceso de facturación y el control de cobros.',
-  tiempo:       'Una de las áreas con más fugas: el tiempo del empresario y la autonomía del equipo.',
-  metricas:     'Por último, comprobaremos si la empresa toma decisiones basadas en datos reales.',
-}
+import { PHASES, PHASE_DESCRIPTIONS } from '../data/tree.js'
 
 export default function PhaseIntro({ phaseId, onContinue }) {
-  const phase = PHASES.find(p => p.id === phaseId)
+  const phase = PHASES[phaseId]
   if (!phase) return null
 
   return (

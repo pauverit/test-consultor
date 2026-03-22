@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { PHASES, getVisibleQuestions } from './data/questions.js'
+import { NODES, PHASES, START_NODE, getNextNodeId } from './data/tree.js'
 import { generateReport } from './utils/diagnose.js'
 import Welcome from './components/Welcome.jsx'
 import PhaseIntro from './components/PhaseIntro.jsx'
@@ -8,31 +8,31 @@ import QuestionCard from './components/QuestionCard.jsx'
 import ProgressBar from './components/ProgressBar.jsx'
 import ResultsScreen from './components/results/ResultsScreen.jsx'
 
-// Estado de la app
-// screen: 'welcome' | 'phase-intro' | 'question' | 'results'
+// Estimación de preguntas totales por camino (para la barra de progreso)
+const ESTIMATED_TOTAL = 28
 
 export default function App() {
-  const [screen, setScreen] = useState('welcome')
-  const [answers, setAnswers] = useState({})
-  const [questionIndex, setQuestionIndex] = useState(0)    // índice dentro de visibleQuestions
-  const [phaseIntroId, setPhaseIntroId] = useState(null)
-  const [direction, setDirection] = useState(1)
-  const [report, setReport] = useState(null)
+  const [screen, setScreen]           = useState('welcome')    // 'welcome' | 'phase-intro' | 'question' | 'results'
+  const [path, setPath]               = useState([START_NODE]) // historial de IDs visitados
+  const [answers, setAnswers]         = useState({})
+  const [pendingPhase, setPendingPhase] = useState(null)       // fase que vamos a mostrar en intro
+  const [direction, setDirection]     = useState(1)
+  const [report, setReport]           = useState(null)
 
-  // Preguntas visibles según respuestas actuales
-  const visibleQuestions = getVisibleQuestions(answers)
-  const totalQuestions = visibleQuestions.length
-
-  // Pregunta actual
-  const currentQuestion = visibleQuestions[questionIndex]
-
-  // Progreso global
-  const progress = Math.round(((questionIndex) / totalQuestions) * 100)
+  const currentNodeId  = path[path.length - 1]
+  const currentNode    = NODES[currentNodeId]
+  const currentAnswer  = answers[currentNodeId]
+  const progress       = Math.min(Math.round((path.length / ESTIMATED_TOTAL) * 100), 95)
 
   // ─── INICIO ─────────────────────────────────────────────────────────────────
   function handleStart() {
-    setScreen('phase-intro')
-    setPhaseIntroId(PHASES[0].id)
+    const firstPhase = PHASES[currentNode.phase]
+    if (firstPhase?.showIntro) {
+      setPendingPhase(currentNode.phase)
+      setScreen('phase-intro')
+    } else {
+      setScreen('question')
+    }
   }
 
   // ─── CONTINUAR DESDE PHASE INTRO ────────────────────────────────────────────
@@ -40,106 +40,111 @@ export default function App() {
     setScreen('question')
   }
 
-  // ─── RESPONDER ───────────────────────────────────────────────────────────────
+  // ─── GUARDAR RESPUESTA ───────────────────────────────────────────────────────
   function handleChange(value) {
-    if (!currentQuestion) return
-    setAnswers(prev => ({ ...prev, [currentQuestion.id]: value }))
+    setAnswers(prev => ({ ...prev, [currentNodeId]: value }))
   }
 
   // ─── SIGUIENTE ───────────────────────────────────────────────────────────────
   function handleNext() {
-    if (!currentQuestion) return
+    const value     = answers[currentNodeId]
+    const nextId    = getNextNodeId(currentNode, value)
 
-    const nextIndex = questionIndex + 1
+    setDirection(1)
 
-    // Recalcular visibles con las respuestas actualizadas
-    const updatedVisible = getVisibleQuestions(answers)
-
-    if (nextIndex >= updatedVisible.length) {
-      // FIN DEL TEST
-      const r = generateReport(answers)
+    // FIN DEL ÁRBOL
+    if (!nextId) {
+      const r = generateReport({ ...answers })
       setReport(r)
       setScreen('results')
       return
     }
 
-    const nextQuestion = updatedVisible[nextIndex]
-    const currentPhaseId = currentQuestion.phase
-    const nextPhaseId = nextQuestion.phase
-
-    setDirection(1)
+    const nextNode      = NODES[nextId]
+    const currentPhase  = currentNode.phase
+    const nextPhase     = nextNode?.phase
 
     // ¿Cambia de fase?
-    if (nextPhaseId !== currentPhaseId) {
-      setQuestionIndex(nextIndex)
-      setPhaseIntroId(nextPhaseId)
+    if (nextPhase && nextPhase !== currentPhase && PHASES[nextPhase]?.showIntro) {
+      setPendingPhase(nextPhase)
+      setPath(prev => [...prev, nextId])
       setScreen('phase-intro')
     } else {
-      setQuestionIndex(nextIndex)
+      setPath(prev => [...prev, nextId])
     }
   }
 
   // ─── ATRÁS ───────────────────────────────────────────────────────────────────
   function handleBack() {
-    if (questionIndex === 0) {
+    setDirection(-1)
+
+    if (path.length <= 1) {
       setScreen('welcome')
       return
     }
-    setDirection(-1)
-    setQuestionIndex(i => i - 1)
+
+    // Quitar el nodo actual del path
+    const newPath = path.slice(0, -1)
+    setPath(newPath)
+
+    // Si volvemos a una pantalla con phase-intro, simplemente mostramos la pregunta anterior
+    // (no volvemos a mostrar el phase-intro al ir atrás)
+    setScreen('question')
   }
 
   // ─── REINICIAR ───────────────────────────────────────────────────────────────
   function handleRestart() {
     setScreen('welcome')
+    setPath([START_NODE])
     setAnswers({})
-    setQuestionIndex(0)
     setReport(null)
     setDirection(1)
+    setPendingPhase(null)
   }
 
   // ─── RENDER ──────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen">
       <AnimatePresence mode="wait">
+
         {screen === 'welcome' && (
           <Welcome key="welcome" onStart={handleStart} />
         )}
 
-        {screen === 'phase-intro' && (
+        {screen === 'phase-intro' && pendingPhase && (
           <PhaseIntro
-            key={`intro-${phaseIntroId}`}
-            phaseId={phaseIntroId}
+            key={`intro-${pendingPhase}`}
+            phaseId={pendingPhase}
             onContinue={handlePhaseIntroContinue}
           />
         )}
 
-        {screen === 'question' && currentQuestion && (
+        {screen === 'question' && currentNode && (
           <motion.div
             key="question-screen"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-24 pb-12 px-6"
+            className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 pt-28 pb-16 px-6"
           >
             <ProgressBar
-              currentPhase={currentQuestion.phase}
+              currentPhase={currentNode.phase}
               progress={progress}
-              questionNum={questionIndex + 1}
-              totalQuestions={totalQuestions}
+              questionNum={path.length}
+              estimatedTotal={ESTIMATED_TOTAL}
             />
 
             <div className="max-w-2xl mx-auto">
               <AnimatePresence mode="wait" custom={direction}>
                 <QuestionCard
-                  key={currentQuestion.id}
-                  question={currentQuestion}
-                  value={answers[currentQuestion.id]}
+                  key={currentNodeId}
+                  question={currentNode}
+                  value={currentAnswer}
                   onChange={handleChange}
                   onNext={handleNext}
                   onBack={handleBack}
                   direction={direction}
-                  isFirst={questionIndex === 0}
+                  isFirst={path.length === 1}
                 />
               </AnimatePresence>
             </div>
@@ -153,6 +158,7 @@ export default function App() {
             onRestart={handleRestart}
           />
         )}
+
       </AnimatePresence>
     </div>
   )

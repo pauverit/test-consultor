@@ -1,230 +1,261 @@
-import { QUESTIONS, PHASES, getVisibleQuestions } from '../data/questions.js'
+import { NODES } from '../data/tree.js'
 import { getRecommendedModules } from '../data/modules.js'
 
-// ─── ÁREAS DE DIAGNÓSTICO ─────────────────────────────────────────────────────
 export const AREAS = [
-  { id: 'ventas_crm',    label: 'Ventas y CRM',         icon: '🤝', phase: 'ventas' },
-  { id: 'presupuestacion', label: 'Presupuestación',    icon: '📄', phase: 'ventas' },
-  { id: 'operaciones',   label: 'Operaciones',           icon: '⚙️', phase: 'operaciones' },
-  { id: 'inventario',    label: 'Inventario y Compras',  icon: '📦', phase: 'inventario' },
-  { id: 'facturacion',   label: 'Facturación y Cobros',  icon: '💶', phase: 'facturacion' },
-  { id: 'tiempo',        label: 'Gestión del Tiempo',    icon: '⏱️', phase: 'tiempo' },
-  { id: 'metricas',      label: 'Datos y Métricas',      icon: '📊', phase: 'metricas' },
+  { id: 'ventas_crm',      label: 'Ventas y Clientes',    icon: '🤝' },
+  { id: 'presupuestacion', label: 'Presupuestación',      icon: '📄' },
+  { id: 'operaciones',     label: 'Operaciones',          icon: '⚙️' },
+  { id: 'inventario',      label: 'Inventario y Compras', icon: '📦' },
+  { id: 'facturacion',     label: 'Facturación y Cobros', icon: '💶' },
+  { id: 'tiempo',          label: 'Gestión del Tiempo',   icon: '⏱️' },
+  { id: 'metricas',        label: 'Datos y Métricas',     icon: '📊' },
 ]
 
-// ─── FUGAS POSIBLES ────────────────────────────────────────────────────────────
 const LEAK_RULES = [
-  {
-    id: 'sin_crm',
-    title: 'Clientes y oportunidades sin registrar',
-    description: 'No tener un sistema de registro de clientes significa que se pierden oportunidades de venta y no hay historial para fidelizar.',
-    impact: 'alto',
-    area: 'ventas_crm',
-    trigger: (ans) => ans.crm === 'no_registro',
-    euros: 'Pérdida estimada: 10-20% de ventas potenciales no cerradas',
-  },
   {
     id: 'sin_seguimiento',
     title: 'Presupuestos enviados sin seguimiento',
-    description: 'La mayoría de ventas se cierran después del 5º contacto. Si no se hace seguimiento, se pierde dinero sobre la mesa.',
-    impact: 'alto',
-    area: 'ventas_crm',
-    trigger: (ans) => ans.seguimiento_presupuestos === 'casi_nunca' || ans.seguimiento_presupuestos === 'a_veces',
-    euros: 'Pérdida estimada: 30-40% de presupuestos no cerrados por falta de seguimiento',
+    description: 'La mayoría de ventas se cierran después del 5º contacto. Sin seguimiento sistemático, se pierde dinero sobre la mesa.',
+    impact: 'alto', area: 'ventas_crm',
+    euros: 'Pérdida estimada: 30-40% de presupuestos sin cerrar por falta de seguimiento',
+    trigger: (ans) => ans.reformas_seguimiento === 'nunca' || ans.reformas_seguimiento === 'a_veces',
+  },
+  {
+    id: 'sin_crm',
+    title: 'Clientes y oportunidades sin registrar',
+    description: 'Sin registro de clientes y presupuestos no hay historial, seguimiento ni fidelización posible.',
+    impact: 'alto', area: 'ventas_crm',
+    euros: 'Pérdida estimada: 10-20% de ventas potenciales no cerradas por falta de control',
+    trigger: (ans) => ans.reformas_crm === 'no',
+  },
+  {
+    id: 'sin_contratos_mant',
+    title: 'Sin contratos de mantenimiento recurrente',
+    description: 'Los contratos de mantenimiento son ingresos predecibles y fidelización garantizada. Sin ellos cada mes se empieza de cero.',
+    impact: 'alto', area: 'ventas_crm',
+    euros: 'Oportunidad perdida: facturación recurrente estable con margen alto',
+    trigger: (ans) => ans.tech_hw_contratos === 'no',
+  },
+  {
+    id: 'perdida_renovaciones',
+    title: 'Pérdida de renovaciones por falta de control',
+    description: 'Si las licencias y contratos vencen sin avisar al cliente a tiempo, se pierden renovaciones que eran ventas seguras.',
+    impact: 'alto', area: 'ventas_crm',
+    euros: 'Pérdida directa: importe de cada renovación no gestionada a tiempo',
+    trigger: (ans) => ans.tech_sw_renovaciones === 'frecuente' || ans.tech_sw_renovaciones === 'a_veces',
+  },
+  {
+    id: 'sin_fidelizacion',
+    title: 'Sin base de datos ni fidelización de clientes',
+    description: 'Sin fidelización se depende siempre de clientes nuevos. Retener cuesta 5 veces menos que captar.',
+    impact: 'medio', area: 'ventas_crm',
+    euros: 'Coste de oportunidad: clientes que compran una vez y no vuelven',
+    trigger: (ans) => ans.comercio_fidelizacion === 'no',
   },
   {
     id: 'presupuestos_lentos',
-    title: 'Tiempo excesivo en elaborar presupuestos',
-    description: 'Hacer presupuestos a mano o en Excel cada vez desde cero consume horas que podrían invertirse en vender o producir.',
-    impact: 'medio',
-    area: 'presupuestacion',
-    trigger: (ans) => ans.tiempo_presupuesto === 'mas2h' || (ans.tiempo_presupuesto === '30a2h' && ans.como_presupuestos !== 'software'),
-    euros: 'Coste estimado: 1-3 horas por presupuesto multiplicado por todos los que haces al mes',
+    title: 'Tiempo excesivo elaborando presupuestos',
+    description: 'Hacer presupuestos desde cero en Excel o a mano consume horas que podrían invertirse en producir o vender.',
+    impact: 'medio', area: 'presupuestacion',
+    euros: 'Coste estimado: 2-8 horas por presupuesto × volumen mensual',
+    trigger: (ans) =>
+      ans.reformas_presupuesto_como === 'manual' ||
+      (ans.reformas_presupuesto_como === 'excel' && ans.reformas_tiempo_presupuesto !== 'menos2h') ||
+      ans.reformas_tiempo_presupuesto === 'mas1dia',
   },
   {
     id: 'sin_margen',
-    title: 'Trabajos sin calcular rentabilidad',
-    description: 'Sin conocer el margen real por trabajo, es imposible saber si la empresa gana o pierde dinero en cada proyecto.',
-    impact: 'alto',
-    area: 'operaciones',
-    trigger: (ans) => ans.margen_trabajo === 'no',
-    euros: 'Riesgo: trabajos aparentemente activos que en realidad generan pérdidas',
+    title: 'Trabajos sin calcular su rentabilidad real',
+    description: 'Sin conocer el margen real por trabajo es imposible saber si se gana o pierde dinero en cada proyecto.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Riesgo: trabajos que en realidad generan pérdidas sin que nadie lo sepa',
+    trigger: (ans) =>
+      ans.reformas_margen_obra === 'no' ||
+      ans.comercio_dist_margen === 'no' ||
+      ans.ind_costes_produccion === 'no',
   },
   {
-    id: 'horas_sin_control',
-    title: 'Horas de trabajadores sin controlar',
-    description: 'Sin control de horas es imposible medir productividad, calcular costes reales ni detectar ineficiencias en el equipo.',
-    impact: 'medio',
-    area: 'operaciones',
-    trigger: (ans) => ans.control_horas === 'no' && ans.empleados !== 'solo',
-    euros: 'Coste oculto: horas improductivas no detectadas',
+    id: 'sin_control_costes',
+    title: 'Sin control de costes reales vs. presupuestados',
+    description: 'Presupuestar bien pero no controlar los costes durante la ejecución es igual de peligroso. Las desviaciones se acumulan.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Pérdida oculta: desviaciones de coste que reducen el margen sin que nadie las detecte',
+    trigger: (ans) => ans.reformas_costes_materiales === 'no',
+  },
+  {
+    id: 'sin_base_conocimiento',
+    title: 'El conocimiento técnico está solo en la cabeza del técnico',
+    description: 'Si el saber-hacer no está documentado, el negocio depende de una persona. Si se va, el problema se va con ella.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Riesgo: dependencia total de personas clave para resolver incidencias',
+    trigger: (ans) => ans.tech_hw_base_conocimiento === 'no',
+  },
+  {
+    id: 'sin_tickets',
+    title: 'Gestión de incidencias sin sistema de tickets',
+    description: 'Sin tickets no hay priorización, no hay trazabilidad de tiempos de resolución y los clientes no tienen visibilidad de sus incidencias.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Impacto: SLA incumplidos, clientes insatisfechos, sin datos para mejorar',
+    trigger: (ans) => ans.tech_hw_tickets === 'whatsapp' || ans.tech_hw_tickets === 'no',
+  },
+  {
+    id: 'sin_escandallos',
+    title: 'Sin escandallos: coste real de cada plato desconocido',
+    description: 'Sin saber el coste real de cada plato es imposible poner precios correctos ni detectar platos con margen negativo.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Riesgo: platos vendidos por debajo de su coste real sin saberlo',
+    trigger: (ans) => ans.hoste_escandallos === 'no',
   },
   {
     id: 'stock_descontrolado',
     title: 'Inventario sin control real',
-    description: 'La diferencia entre el stock del sistema y el real genera compras innecesarias, roturas de stock y pérdida de material.',
-    impact: 'alto',
-    area: 'inventario',
-    trigger: (ans) => ans.control_stock === 'no' || ans.stock_real === 'no',
-    euros: 'Pérdida estimada: 5-15% del valor del inventario anual',
+    description: 'Sin control de stock el inventario no es fiable. Se compra de más, se pierde material y se producen roturas de stock.',
+    impact: 'alto', area: 'inventario',
+    euros: 'Pérdida estimada: 5-15% del valor del inventario anual en material perdido o inmovilizado',
+    trigger: (ans) =>
+      ans.comercio_stock_fisico === 'no' ||
+      ans.comercio_dist_stock === 'no' ||
+      ans.tech_hw_stock_piezas === 'no',
   },
   {
-    id: 'rotura_stock',
-    title: 'Roturas de stock que paran los trabajos',
-    description: 'Cada parada por falta de material tiene un coste directo en horas de personal y retrasos que dañan la imagen ante el cliente.',
-    impact: 'alto',
-    area: 'inventario',
-    trigger: (ans) => ans.rotura_stock === 'frecuente',
-    euros: 'Coste directo: horas paradas + penalizaciones + pérdida de clientes',
+    id: 'roturas_stock',
+    title: 'Roturas de stock que generan pérdida de ventas',
+    description: 'Cada vez que no puedes servir un pedido por falta de stock pierdes la venta y dañas la imagen ante el cliente.',
+    impact: 'alto', area: 'inventario',
+    euros: 'Pérdida directa: ventas perdidas + daño a la fidelización del cliente',
+    trigger: (ans) => ans.comercio_dist_rotura === 'frecuente',
   },
   {
     id: 'facturas_olvidadas',
     title: 'Trabajos realizados sin facturar',
-    description: 'Si alguna vez se ha olvidado facturar un trabajo, el dinero está literalmente tirado. Son ingresos que ya se ganaron pero nunca se cobraron.',
-    impact: 'critico',
-    area: 'facturacion',
-    trigger: (ans) => ans.olvido_factura === 'si_ha_pasado' || ans.olvido_factura === 'alguna_vez',
+    description: 'Si alguna vez se olvidó facturar un trabajo, ese dinero está perdido. Son ingresos ganados que nunca se cobrarán.',
+    impact: 'critico', area: 'facturacion',
     euros: 'Pérdida directa: 100% del importe de los trabajos no facturados',
+    trigger: (ans) =>
+      ans.common_olvido_factura === 'si_ha_pasado' ||
+      ans.common_olvido_factura === 'alguna_vez',
   },
   {
     id: 'impagos_sin_gestionar',
-    title: 'Impagos sin reclamar',
-    description: 'Facturas emitidas que nunca se cobraron y nadie está reclamando. Dinero perdido que ya debería estar en la cuenta.',
-    impact: 'critico',
-    area: 'facturacion',
-    trigger: (ans) => ans.impagos === 'si_varios',
-    euros: 'Pérdida directa: suma de todas las facturas impagadas acumuladas',
+    title: 'Impagados acumulados sin reclamar',
+    description: 'Facturas emitidas que nadie está cobrando. Es dinero que ya debería estar en la cuenta.',
+    impact: 'critico', area: 'facturacion',
+    euros: 'Pérdida directa: suma total de facturas impagadas sin gestionar',
+    trigger: (ans) => ans.common_impagos === 'si_varios',
   },
   {
     id: 'facturacion_lenta',
     title: 'Facturación tardía que retrasa el cobro',
-    description: 'Cuanto más tarde en emitir la factura, más tarde cobras. El retraso acumulado puede generar tensiones de tesorería innecesarias.',
-    impact: 'medio',
-    area: 'facturacion',
-    trigger: (ans) => ans.tiempo_factura === 'mas_semana',
-    euros: 'Impacto en tesorería: retrasos de cobro innecesarios',
+    description: 'Cada semana entre terminar un trabajo y emitir la factura es una semana más de retraso en el cobro.',
+    impact: 'medio', area: 'facturacion',
+    euros: 'Impacto en tesorería: retrasos acumulados mes a mes',
+    trigger: (ans) => ans.common_tiempo_factura === 'mas_semana',
   },
   {
-    id: 'empresario_cuello_botella',
-    title: 'El empresario como cuello de botella',
-    description: 'Si el negocio depende de que estés presente para funcionar, no tienes un negocio: tienes un trabajo muy costoso. Esto limita el crecimiento.',
-    impact: 'alto',
-    area: 'tiempo',
-    trigger: (ans) => ans.vacaciones === 'no_puedo' || ans.tareas_solo_yo === 'muchas',
-    euros: 'Limitación de crecimiento: el negocio no puede escalar contigo como cuello de botella',
+    id: 'obras_al_final',
+    title: 'Obras grandes financiadas sin anticipos ni hitos',
+    description: 'Financiar obras sin pedir certificaciones o anticipos es prestar dinero gratis al cliente durante meses.',
+    impact: 'alto', area: 'facturacion',
+    euros: 'Coste financiero: materiales y mano de obra financiados sin cobrar',
+    trigger: (ans) => ans.reformas_facturacion_hitos === 'al_final',
+  },
+  {
+    id: 'credito_sin_control',
+    title: 'Crédito concedido sin control de riesgo',
+    description: 'Dar crédito sin límites formales es la causa número uno de impagados en distribución.',
+    impact: 'alto', area: 'facturacion',
+    euros: 'Riesgo: impagados de clientes a los que se ha dado más crédito del que pueden pagar',
+    trigger: (ans) => ans.comercio_dist_credito === 'si_sin_control',
+  },
+  {
+    id: 'cuello_botella',
+    title: 'El empresario como cuello de botella del negocio',
+    description: 'Si el negocio depende de tu presencia para funcionar, no puedes crecer más rápido que tu tiempo disponible.',
+    impact: 'alto', area: 'tiempo',
+    euros: 'Limitación de crecimiento: el negocio no puede escalar más rápido que el tiempo del dueño',
+    trigger: (ans) =>
+      ans.common_vacaciones === 'no_puedo' ||
+      ans.common_cuello_botella === 'muchas',
   },
   {
     id: 'exceso_admin',
     title: 'Demasiado tiempo en tareas administrativas',
-    description: 'Más de 3 horas al día en tareas administrativas significa que el empresario no está haciendo lo que más valor aporta.',
-    impact: 'alto',
-    area: 'tiempo',
-    trigger: (ans) => ans.horas_admin === '3a5' || ans.horas_admin === 'mas5',
-    euros: 'Coste de oportunidad: horas que podrías dedicar a vender o crecer',
+    description: 'Más de 3 horas al día en burocracia significa que el empresario no está haciendo lo que más valor aporta.',
+    impact: 'alto', area: 'tiempo',
+    euros: 'Coste de oportunidad: horas de alto valor ocupadas en tareas automatizables',
+    trigger: (ans) => ans.common_horas_admin === '3a5' || ans.common_horas_admin === 'mas5',
   },
   {
     id: 'sin_metricas',
-    title: 'Toma de decisiones sin datos',
-    description: 'Gestionar un negocio sin indicadores es como conducir con los ojos cerrados. Las decisiones importantes se toman por intuición en lugar de por datos.',
-    impact: 'alto',
-    area: 'metricas',
-    trigger: (ans) => ans.panel_kpi === 'no' || ans.frecuencia_numeros === 'nunca',
+    title: 'Toma de decisiones sin datos objetivos',
+    description: 'Gestionar un negocio sin indicadores es como conducir con los ojos cerrados. Se decide por intuición en lugar de por datos.',
+    impact: 'alto', area: 'metricas',
     euros: 'Riesgo: decisiones erróneas con impacto económico difícil de cuantificar',
+    trigger: (ans) => ans.common_panel_kpi === 'no' || ans.common_frecuencia_numeros === 'nunca',
   },
   {
     id: 'clientes_no_rentables',
     title: 'Clientes no rentables sin detectar',
-    description: 'Si no sabes qué clientes te dan dinero y cuáles te lo quitan, estás trabajando para algunos que te cuestan más de lo que te pagan.',
-    impact: 'medio',
-    area: 'metricas',
-    trigger: (ans) => ans.cliente_rentable === 'no',
+    description: 'Si no sabes cuáles clientes te dan dinero y cuáles te lo quitan, estás trabajando para algunos que te cuestan más de lo que pagan.',
+    impact: 'medio', area: 'metricas',
     euros: 'Pérdida oculta: clientes que generan costes superiores a sus ingresos',
-  },
-  {
-    id: 'interrupciones',
-    title: 'Equipo dependiente del empresario para todo',
-    description: 'Si tu equipo te interrumpe constantemente, es porque no tienen las herramientas, la información o los procesos para ser autónomos.',
-    impact: 'medio',
-    area: 'tiempo',
-    trigger: (ans) => ans.interrupciones === 'constantemente',
-    euros: 'Coste: fragmentación del tiempo = baja productividad del empresario',
+    trigger: (ans) => ans.common_cliente_rentable === 'no',
   },
 ]
 
-// ─── CALCULAR SCORE POR ÁREA ───────────────────────────────────────────────────
 function calcAreaScores(answers) {
-  const visible = getVisibleQuestions(answers)
   const areaData = {}
-
-  AREAS.forEach(area => {
-    const qs = visible.filter(q => q.area === area.id && q.scoreMap)
-    if (qs.length === 0) {
-      areaData[area.id] = null // no aplica
-      return
-    }
-    let total = 0
-    let count = 0
-    qs.forEach(q => {
-      const val = answers[q.id]
-      if (val && q.scoreMap[val] !== undefined) {
-        total += q.scoreMap[val]
-        count++
-      }
-    })
-    const score = count > 0 ? Math.round((total / (count * 3)) * 100) : null
-    areaData[area.id] = score
+  Object.values(NODES).forEach(node => {
+    if (!node.area || !node.scoreMap) return
+    const val = answers[node.id]
+    if (!val || Array.isArray(val)) return
+    const score = node.scoreMap[val]
+    if (score === undefined) return
+    if (!areaData[node.area]) areaData[node.area] = { total: 0, count: 0 }
+    areaData[node.area].total += score
+    areaData[node.area].count++
   })
-  return areaData
+  const result = {}
+  Object.entries(areaData).forEach(([area, data]) => {
+    result[area] = data.count > 0 ? Math.round((data.total / (data.count * 3)) * 100) : null
+  })
+  return result
 }
 
-// ─── SCORE GLOBAL ─────────────────────────────────────────────────────────────
 function calcGlobalScore(areaScores) {
   const values = Object.values(areaScores).filter(v => v !== null)
   if (!values.length) return 0
   return Math.round(values.reduce((a, b) => a + b, 0) / values.length)
 }
 
-// ─── FUNCIÓN PRINCIPAL ────────────────────────────────────────────────────────
 export function generateReport(answers) {
-  const areaScores = calcAreaScores(answers)
+  const areaScores  = calcAreaScores(answers)
   const globalScore = calcGlobalScore(areaScores)
 
   const leaks = LEAK_RULES
     .filter(r => r.trigger(answers))
-    .sort((a, b) => {
-      const order = { critico: 0, alto: 1, medio: 2 }
-      return order[a.impact] - order[b.impact]
-    })
+    .sort((a, b) => ({ critico: 0, alto: 1, medio: 2 }[a.impact] - { critico: 0, alto: 1, medio: 2 }[b.impact]))
 
   const modules = getRecommendedModules(answers)
-
-  const areas = AREAS.map(area => ({
-    ...area,
-    score: areaScores[area.id],
-  })).filter(a => a.score !== null)
+  const areas   = AREAS.map(a => ({ ...a, score: areaScores[a.id] })).filter(a => a.score !== null)
 
   return {
-    globalScore,
-    areas,
-    leaks,
-    modules,
-    answers,
-    generatedAt: new Date().toLocaleDateString('es-ES', {
-      day: '2-digit', month: 'long', year: 'numeric',
-    }),
+    globalScore, areas, leaks, modules, answers,
+    sector: answers.sector,
+    generatedAt: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
   }
 }
 
 export function getScoreLabel(score) {
-  if (score >= 75) return { label: 'Bueno', color: 'text-emerald-600', bg: 'bg-emerald-100', bar: 'bg-emerald-500' }
-  if (score >= 50) return { label: 'Mejorable', color: 'text-amber-600', bg: 'bg-amber-100', bar: 'bg-amber-500' }
-  if (score >= 25) return { label: 'Problema', color: 'text-orange-600', bg: 'bg-orange-100', bar: 'bg-orange-500' }
-  return { label: 'Crítico', color: 'text-red-600', bg: 'bg-red-100', bar: 'bg-red-500' }
+  if (score >= 75) return { label: 'Bueno',     color: 'text-emerald-600', bg: 'bg-emerald-100', bar: 'bg-emerald-500' }
+  if (score >= 50) return { label: 'Mejorable', color: 'text-amber-600',   bg: 'bg-amber-100',   bar: 'bg-amber-500' }
+  if (score >= 25) return { label: 'Problema',  color: 'text-orange-600',  bg: 'bg-orange-100',  bar: 'bg-orange-500' }
+  return                  { label: 'Crítico',   color: 'text-red-600',     bg: 'bg-red-100',     bar: 'bg-red-500' }
 }
 
 export function getGlobalLabel(score) {
-  if (score >= 75) return { label: 'Negocio bien gestionado', emoji: '✅', color: 'text-emerald-600' }
-  if (score >= 50) return { label: 'Con margen de mejora', emoji: '⚡', color: 'text-amber-600' }
-  if (score >= 25) return { label: 'Fugas importantes detectadas', emoji: '⚠️', color: 'text-orange-600' }
-  return { label: 'Situación crítica — actúa ahora', emoji: '🚨', color: 'text-red-600' }
+  if (score >= 75) return { label: 'Negocio bien gestionado',         emoji: '✅', color: 'text-emerald-600' }
+  if (score >= 50) return { label: 'Con margen de mejora claro',      emoji: '⚡', color: 'text-amber-600' }
+  if (score >= 25) return { label: 'Fugas importantes detectadas',    emoji: '⚠️', color: 'text-orange-600' }
+  return                  { label: 'Situación crítica — actúa ahora', emoji: '🚨', color: 'text-red-600' }
 }
