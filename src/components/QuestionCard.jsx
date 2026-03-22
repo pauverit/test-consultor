@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 const variants = {
   enter: (dir) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
@@ -7,14 +7,13 @@ const variants = {
   exit:  (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
 }
 
-export default function QuestionCard({ question, value, onChange, onNext, onBack, direction = 1, isFirst }) {
+export default function QuestionCard({ node, nodeId, value, onChange, onNext, onBack, direction = 1, isFirst }) {
   const [localMulti, setLocalMulti] = useState(
-    question.type === 'multi' ? (Array.isArray(value) ? value : []) : []
+    node.type === 'multi' ? (Array.isArray(value) ? value : []) : []
   )
 
   function handleSingle(optVal) {
-    // Solo actualizamos la respuesta — el auto-avance lo gestiona App.jsx via useEffect
-    onChange(optVal)
+    onChange(nodeId, node, optVal)
   }
 
   function toggleMulti(optVal) {
@@ -22,7 +21,7 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
       const next = prev.includes(optVal)
         ? prev.filter(v => v !== optVal)
         : [...prev, optVal]
-      onChange(next)
+      onChange(nodeId, node, next)
       return next
     })
   }
@@ -31,7 +30,7 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
 
   return (
     <motion.div
-      key={question.id}
+      key={nodeId}
       custom={direction}
       variants={variants}
       initial="enter"
@@ -43,34 +42,33 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
       {/* Pregunta */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-slate-900 mb-2 leading-snug">
-          {question.question}
+          {node.question}
         </h2>
-        {question.hint && (
-          <p className="text-slate-500 text-sm">{question.hint}</p>
+        {node.hint && (
+          <p className="text-slate-500 text-sm">{node.hint}</p>
         )}
-        {question.type === 'multi' && (
+        {node.type === 'multi' && (
           <p className="text-brand-600 text-sm font-medium mt-1">
             Puedes seleccionar varias opciones
           </p>
         )}
       </div>
 
-      {/* Opciones */}
-      {question.type === 'single' && (
+      {/* Opciones single */}
+      {node.type === 'single' && (
         <div className="space-y-3">
-          {question.options.map(opt => (
+          {node.options.map(opt => (
             <button
               key={opt.value}
               className={`option-btn ${value === opt.value ? 'selected' : ''}`}
               onClick={() => handleSingle(opt.value)}
             >
               <span className="flex items-center gap-3">
-                {value === opt.value && (
+                {value === opt.value ? (
                   <span className="w-5 h-5 rounded-full border-2 border-brand-500 flex items-center justify-center flex-shrink-0">
                     <span className="w-2.5 h-2.5 rounded-full bg-brand-500" />
                   </span>
-                )}
-                {value !== opt.value && (
+                ) : (
                   <span className="w-5 h-5 rounded-full border-2 border-slate-300 flex-shrink-0" />
                 )}
                 {opt.label}
@@ -80,9 +78,10 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
         </div>
       )}
 
-      {question.type === 'multi' && (
+      {/* Opciones multi */}
+      {node.type === 'multi' && (
         <div className="space-y-3">
-          {question.options.map(opt => {
+          {node.options.map(opt => {
             const selected = localMulti.includes(opt.value)
             return (
               <button
@@ -106,7 +105,6 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
             )
           })}
 
-          {/* Botón continuar para multi */}
           <div className="pt-4 flex gap-3">
             {!isFirst && (
               <button onClick={onBack} className="btn-secondary">
@@ -125,7 +123,7 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
       )}
 
       {/* Botón atrás para single */}
-      {question.type === 'single' && !isFirst && (
+      {node.type === 'single' && !isFirst && (
         <div className="mt-6">
           <button onClick={onBack} className="btn-secondary text-sm">
             ← Pregunta anterior
