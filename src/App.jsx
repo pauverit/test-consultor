@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { NODES, PHASES, START_NODE, getNextNodeId } from './data/tree.js'
 import { generateReport } from './utils/diagnose.js'
@@ -24,6 +24,53 @@ export default function App() {
   const currentAnswer  = answers[currentNodeId]
   const progress       = Math.min(Math.round((path.length / ESTIMATED_TOTAL) * 100), 95)
 
+  // Refs siempre actualizados para usarlos dentro de timers
+  const currentNodeRef   = useRef(currentNode)
+  const currentNodeIdRef = useRef(currentNodeId)
+  const answersRef       = useRef(answers)
+  currentNodeRef.current   = currentNode
+  currentNodeIdRef.current = currentNodeId
+  answersRef.current       = answers
+
+  // Auto-avance para preguntas single
+  // Se ejecuta cuando cambia la respuesta de la pregunta actual
+  useEffect(() => {
+    if (!currentNode || currentNode.type !== 'single') return
+    const capturedValue  = answers[currentNodeId]   // valor que disparó el efecto
+    const capturedNodeId = currentNodeId             // nodo en el que estamos ahora
+    if (!capturedValue) return
+
+    const timer = setTimeout(() => {
+      // Si el usuario ya navegó antes de que el timer dispare, cancelamos
+      if (currentNodeIdRef.current !== capturedNodeId) return
+
+      const node   = currentNodeRef.current
+      const nextId = getNextNodeId(node, capturedValue)
+
+      if (!nextId) {
+        const r = generateReport({ ...answersRef.current })
+        setReport(r)
+        setScreen('results')
+        return
+      }
+
+      const nextNode     = NODES[nextId]
+      const currentPhase = node.phase
+      const nextPhase    = nextNode?.phase
+
+      if (nextPhase && nextPhase !== currentPhase && PHASES[nextPhase]?.showIntro) {
+        setPendingPhase(nextPhase)
+        setPath(prev => [...prev, nextId])
+        setScreen('phase-intro')
+      } else {
+        setPath(prev => [...prev, nextId])
+      }
+    }, 300)
+
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers[currentNodeId]])
+
   // ─── INICIO ─────────────────────────────────────────────────────────────────
   function handleStart() {
     const firstPhase = PHASES[currentNode.phase]
@@ -45,30 +92,24 @@ export default function App() {
     setAnswers(prev => ({ ...prev, [currentNodeId]: value }))
   }
 
-  // ─── SIGUIENTE ───────────────────────────────────────────────────────────────
-  function handleNext(valueOverride) {
-    const value     = valueOverride ?? answers[currentNodeId]
-    const nextId    = getNextNodeId(currentNode, value)
+  // ─── SIGUIENTE (solo para preguntas multi — las single usan el useEffect) ────
+  function handleNext() {
+    const value  = answers[currentNodeId]
+    const nextId = getNextNodeId(currentNode, value)
 
     setDirection(1)
 
-    // FIN DEL ÁRBOL
     if (!nextId) {
-      // Incluimos la última respuesta que aún no está en el estado (closure obsoleta)
-      const finalAnswers = valueOverride
-        ? { ...answers, [currentNodeId]: valueOverride }
-        : { ...answers }
-      const r = generateReport(finalAnswers)
+      const r = generateReport({ ...answers })
       setReport(r)
       setScreen('results')
       return
     }
 
-    const nextNode      = NODES[nextId]
-    const currentPhase  = currentNode.phase
-    const nextPhase     = nextNode?.phase
+    const nextNode     = NODES[nextId]
+    const currentPhase = currentNode.phase
+    const nextPhase    = nextNode?.phase
 
-    // ¿Cambia de fase?
     if (nextPhase && nextPhase !== currentPhase && PHASES[nextPhase]?.showIntro) {
       setPendingPhase(nextPhase)
       setPath(prev => [...prev, nextId])

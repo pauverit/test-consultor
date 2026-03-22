@@ -13,9 +13,8 @@ export default function QuestionCard({ question, value, onChange, onNext, onBack
   )
 
   function handleSingle(optVal) {
+    // Solo actualizamos la respuesta — el auto-avance lo gestiona App.jsx via useEffect
     onChange(optVal)
-    // Pasamos el valor directamente para evitar closure obsoleta en React
-    setTimeout(() => onNext(optVal), 300)
   }
 
   function toggleMulti(optVal) {
