@@ -524,7 +524,7 @@ export function generateReport(answers) {
     .sort((a, b) => ({ critico: 0, alto: 1, medio: 2 }[a.impact] - { critico: 0, alto: 1, medio: 2 }[b.impact]))
 
   const modules = getRecommendedModules(answers)
-  const areas   = AREAS.map(a => ({ ...a, score: areaScores[a.id] })).filter(a => a.score !== null)
+  const areas   = AREAS.map(a => ({ ...a, score: areaScores[a.id] })).filter(a => a.score !== null && a.score !== undefined)
 
   return {
     globalScore, areas, leaks, modules, answers,
