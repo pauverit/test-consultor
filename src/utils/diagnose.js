@@ -16,9 +16,9 @@ const LEAK_RULES = [
   {
     id: 'sin_seguimiento',
     title: 'Presupuestos enviados sin seguimiento',
-    description: 'La mayoría de ventas se cierran después del 5º contacto. Sin seguimiento sistemático, se pierde dinero sobre la mesa.',
+    description: 'Solo el 2% de las ventas se cierran en el primer contacto — la mayoría después del 5º. Sin seguimiento sistemático se pierde dinero sobre la mesa.',
     impact: 'alto', area: 'ventas_crm',
-    euros: 'Pérdida estimada: 30-40% de presupuestos sin cerrar por falta de seguimiento',
+    euros: 'Pérdida estimada: 30-40% de presupuestos enviados que se cierran con un simple recordatorio',
     trigger: (ans) => ans.reformas_seguimiento === 'nunca' || ans.reformas_seguimiento === 'a_veces',
   },
   {
@@ -129,7 +129,7 @@ const LEAK_RULES = [
   {
     id: 'facturas_olvidadas',
     title: 'Trabajos realizados sin facturar',
-    description: 'Si alguna vez se olvidó facturar un trabajo, ese dinero está perdido. Son ingresos ganados que nunca se cobrarán.',
+    description: 'Si alguna vez se olvidó facturar un trabajo, ese dinero está perdido. El 31% de las PYMEs paga incluso facturas duplicadas por falta de control (ITUser).',
     impact: 'critico', area: 'facturacion',
     euros: 'Pérdida directa: 100% del importe de los trabajos no facturados',
     trigger: (ans) =>
@@ -139,17 +139,17 @@ const LEAK_RULES = [
   {
     id: 'impagos_sin_gestionar',
     title: 'Impagados acumulados sin reclamar',
-    description: 'Facturas emitidas que nadie está cobrando. Es dinero que ya debería estar en la cuenta.',
+    description: 'Facturas emitidas que nadie está cobrando. El periodo medio de cobro en PYMEs españolas es de ~80 días (CEPYME). Sin gestión activa ese plazo se alarga indefinidamente.',
     impact: 'critico', area: 'facturacion',
-    euros: 'Pérdida directa: suma total de facturas impagadas sin gestionar',
+    euros: 'Pérdida directa: suma total de facturas impagadas + coste financiero de financiar al cliente',
     trigger: (ans) => ans.common_impagos === 'si_varios',
   },
   {
     id: 'facturacion_lenta',
     title: 'Facturación tardía que retrasa el cobro',
-    description: 'Cada semana entre terminar un trabajo y emitir la factura es una semana más de retraso en el cobro.',
+    description: 'Cada semana entre terminar un trabajo y emitir la factura es una semana más de retraso en el cobro. Las PYMEs dedican de media 10,5h/mes solo a gestión manual de facturas (ITUser).',
     impact: 'medio', area: 'facturacion',
-    euros: 'Impacto en tesorería: retrasos acumulados mes a mes',
+    euros: 'Impacto en tesorería: retrasos acumulados + horas de gestión manual evitables',
     trigger: (ans) => ans.common_tiempo_factura === 'mas_semana',
   },
   {
@@ -286,6 +286,81 @@ const LEAK_RULES = [
     impact: 'alto', area: 'operaciones',
     euros: 'Coste directo: material rechazado + reclamaciones + pérdida de imagen',
     trigger: (ans) => ans.sector === 'industria' && ans.ind_control_calidad === 'informal',
+  },
+  // ── PELUQUERÍA Y ESTÉTICA ────────────────────────────────────────────────────
+  {
+    id: 'peluq_noshows_alto',
+    title: 'No-shows sin recordatorio: horas y dinero perdidos cada mes',
+    description: 'El 46% de autónomos en servicios de belleza pierde más de 5h/mes por citas no presentadas. Un recordatorio automático las reduce hasta un 70% (Autónomos y Emprendedor).',
+    impact: 'alto', area: 'ventas_crm',
+    euros: 'Estimado: 10+ no-shows/mes × precio medio servicio = 200-500€/mes de ingreso no recuperado',
+    trigger: (ans) => ans.sector === 'peluqueria' && (ans.peluq_noshows === 'muchos' || (ans.peluq_noshows === 'algunos' && ans.peluq_recordatorios === 'no')),
+  },
+  {
+    id: 'peluq_sin_recordatorios',
+    title: 'Sin recordatorios automáticos de cita',
+    description: 'Sin recordatorios automáticos cada no-show es una hora bloqueada que no se puede recuperar ni ofrecer a otro cliente.',
+    impact: 'alto', area: 'ventas_crm',
+    euros: 'Coste directo: horas vacías en agenda × precio medio del servicio',
+    trigger: (ans) => ans.sector === 'peluqueria' && ans.peluq_recordatorios === 'no',
+  },
+  {
+    id: 'peluq_sin_ficha',
+    title: 'Sin ficha de cliente: fidelización y ventas cruzadas imposibles',
+    description: 'Sin historial de servicios y preferencias no puedes personalizar el servicio, recomendar productos ni lanzar campañas de fidelización por fecha de última visita.',
+    impact: 'medio', area: 'ventas_crm',
+    euros: 'Oportunidad perdida: clientes que repiten mucho menos al no sentirse reconocidos ni recordados',
+    trigger: (ans) => ans.sector === 'peluqueria' && ans.peluq_ficha === 'no',
+  },
+  {
+    id: 'peluq_margen_desconocido',
+    title: 'Coste real por servicio desconocido: precios mal ajustados',
+    description: 'Sin calcular el coste de productos + tiempo de personal por servicio, algunos tratamientos pueden venderse con margen negativo sin saberlo.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Riesgo: servicios que generan pérdida real al incluir el coste de producto + tiempo',
+    trigger: (ans) => ans.sector === 'peluqueria' && ans.peluq_margen === 'no',
+  },
+  // ── TALLER Y REPARACIÓN ──────────────────────────────────────────────────────
+  {
+    id: 'taller_sin_ordenes',
+    title: 'Sin órdenes de trabajo digitales: pérdida de control total',
+    description: 'Sin órdenes de trabajo no hay trazabilidad de qué piezas se usaron, cuánto tardó cada reparación ni si el coste real encaja con el presupuesto.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Impacto: trabajos facturados por debajo del coste real + disputas con clientes sin respaldo documental',
+    trigger: (ans) => ans.sector === 'taller' && ans.taller_ordenes === 'no',
+  },
+  {
+    id: 'taller_horas_sin_controlar',
+    title: 'Horas reales vs. presupuestadas sin controlar',
+    description: 'Las desviaciones entre tiempo presupuestado y real son la principal fuga de margen en talleres. Sin medirlo es imposible mejorar los presupuestos ni detectar trabajos deficitarios.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Pérdida oculta: trabajos que duran el doble de lo presupuestado reducen el margen a la mitad',
+    trigger: (ans) => ans.sector === 'taller' && ans.taller_horas === 'no',
+  },
+  {
+    id: 'taller_margen_desconocido',
+    title: 'Margen real por reparación desconocido',
+    description: 'Facturar sin saber si cada reparación es rentable es gestionar a ciegas. Los trabajos "baratos" pueden ser los que más tiempo consumen y menos dejan.',
+    impact: 'alto', area: 'operaciones',
+    euros: 'Riesgo: reparaciones que generan pérdida real al sumar piezas + horas de trabajo',
+    trigger: (ans) => ans.sector === 'taller' && ans.taller_margen === 'no',
+  },
+  {
+    id: 'taller_presupuestos_sin_seguimiento',
+    title: 'Presupuestos de taller enviados sin seguimiento',
+    description: 'Un cliente que no responde al presupuesto puede estar esperando que le llamen. Una llamada a los 2-3 días recupera entre el 20-30% de los presupuestos no contestados.',
+    impact: 'medio', area: 'ventas_crm',
+    euros: 'Estimado: 20-30% de los presupuestos "perdidos" se recuperan con un simple seguimiento',
+    trigger: (ans) => ans.sector === 'taller' && ans.taller_presupuestos === 'no',
+  },
+  // ── MÉTRICAS ─────────────────────────────────────────────────────────────────
+  {
+    id: 'sin_tasa_conversion',
+    title: 'Tasa de conversión de presupuestos no medida',
+    description: 'Sin medir cuántos presupuestos se convierten en venta, es imposible saber si el problema es de precio, de seguimiento o de la competencia. Es el KPI más ignorado y más accionable.',
+    impact: 'medio', area: 'metricas',
+    euros: 'Oportunidad: mejorar la tasa de conversión un 10% puede suponer un 10-20% más de facturación sin más clientes',
+    trigger: (ans) => ans.common_conversion_presupuestos === 'no',
   },
   // ── EQUIPO Y PROCESOS ────────────────────────────────────────────────────────
   {

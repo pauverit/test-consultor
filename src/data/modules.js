@@ -111,7 +111,9 @@ export const SAAS_MODULES = [
       ans.tech_hw_stock_piezas === 'no' ||
       ans.tech_hw_stock_piezas === 'si_excel' ||
       ans.comercio_alertas_stock === 'no' ||
-      ans.comercio_dist_rotura === 'frecuente',
+      ans.comercio_dist_rotura === 'frecuente' ||
+      (ans.sector === 'peluqueria' && ans.peluq_stock !== 'software') ||
+      (ans.sector === 'taller' && ans.taller_stock === 'sin_control'),
   },
   {
     id: 'tpv_hosteleria',
@@ -201,6 +203,42 @@ export const SAAS_MODULES = [
       ans.common_panel_kpi === 'si_no_miro' ||
       ans.common_frecuencia_numeros === 'nunca' ||
       ans.common_cliente_rentable === 'no',
+  },
+  {
+    id: 'agenda_citas',
+    name: 'Agenda Digital y Recordatorios Automáticos',
+    icon: '📅',
+    description: 'Reserva online 24/7, confirmaciones y recordatorios automáticos por WhatsApp/SMS. Elimina los no-shows y libera al personal de gestionar la agenda por teléfono.',
+    beneficios: [
+      'Reserva online 24/7 — el cliente reserva solo sin llamar',
+      'Recordatorios automáticos que reducen no-shows hasta un 70%',
+      'Ficha de cliente con historial completo de servicios',
+      'Gestión de turnos y disponibilidad por trabajador',
+    ],
+    trigger: (ans) =>
+      (ans.sector === 'peluqueria' && (ans.peluq_agenda !== 'app_online' || ans.peluq_recordatorios === 'no')) ||
+      (ans.sector === 'servicios' && ans.serv_agenda === 'si_manual') ||
+      ans.serv_recordatorios_cita === 'no' ||
+      ans.serv_agenda_clinica === 'manual',
+  },
+  {
+    id: 'gestion_taller',
+    name: 'Gestión de Taller y Reparaciones',
+    icon: '🔧',
+    description: 'Órdenes de trabajo digitales, control de horas reales vs. presupuestadas, stock de recambios y rentabilidad por trabajo. Todo en una sola plataforma desde tablet o móvil.',
+    beneficios: [
+      'Órdenes de trabajo digitales con piezas y horas',
+      'Control de horas reales vs. presupuestadas por trabajo',
+      'Stock de recambios con alertas de mínimos',
+      'Rentabilidad real de cada reparación al instante',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'taller' && (
+        ans.taller_ordenes !== 'software' ||
+        ans.taller_horas === 'no' ||
+        ans.taller_stock === 'sin_control' ||
+        ans.taller_margen === 'no'
+      ),
   },
   {
     id: 'gestion_expedientes',

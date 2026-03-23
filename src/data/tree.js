@@ -15,6 +15,8 @@ export const PHASES = {
   hosteleria:   { id: 'hosteleria',   label: 'Hostelería',                icon: '🍽️', color: 'from-rose-500 to-pink-600', showIntro: true },
   servicios:    { id: 'servicios',    label: 'Servicios Profesionales',   icon: '📋', color: 'from-blue-500 to-indigo-600', showIntro: true },
   industria:    { id: 'industria',    label: 'Industria y Fabricación',   icon: '🏭', color: 'from-slate-600 to-slate-800', showIntro: true },
+  peluqueria:   { id: 'peluqueria',   label: 'Peluquería y Estética',     icon: '✂️', color: 'from-pink-500 to-fuchsia-600', showIntro: true },
+  taller:       { id: 'taller',       label: 'Taller y Reparación',       icon: '🔧', color: 'from-zinc-600 to-zinc-800',   showIntro: true },
   datos_empresa:{ id: 'datos_empresa',label: 'Datos de la Empresa',       icon: '📊', color: 'from-slate-400 to-slate-600', showIntro: true },
   equipo:       { id: 'equipo',       label: 'Equipo y Procesos',         icon: '👥', color: 'from-indigo-500 to-blue-600', showIntro: true },
   facturacion:  { id: 'facturacion',  label: 'Facturación y Cobros',      icon: '💶', color: 'from-rose-500 to-pink-600', showIntro: true },
@@ -29,6 +31,8 @@ export const PHASE_DESCRIPTIONS = {
   hosteleria:    'Revisaremos la operación del establecimiento: TPV, escandallos, reservas y proveedores.',
   servicios:     'Analizaremos cómo gestionas los expedientes, citas, clientes y la facturación de tus servicios.',
   industria:     'Veremos la planificación de producción, costes, calidad y materiales.',
+  peluqueria:    'Analizaremos la gestión de citas, los no-shows, la ficha de cliente, el stock de productos y los márgenes por servicio.',
+  taller:        'Revisaremos las órdenes de trabajo, el control de horas, el stock de recambios y la rentabilidad real de cada reparación.',
   datos_empresa: 'Unas preguntas básicas sobre el tamaño y madurez de la empresa para contextualizar el diagnóstico.',
   equipo:        'Cómo funciona el equipo por dentro: coordinación, comunicación interna, autonomía y los procesos del día a día.',
   facturacion:   'Ahora revisaremos el proceso de facturación y el control de cobros — una de las áreas con más fugas ocultas.',
@@ -56,6 +60,8 @@ export const NODES = {
       { value: 'hosteleria', label: '🍽️ Hostelería y Restauración' },
       { value: 'servicios',  label: '📋 Servicios Profesionales' },
       { value: 'industria',  label: '🏭 Industria y Fabricación' },
+      { value: 'peluqueria', label: '✂️ Peluquería, Barbería y Estética' },
+      { value: 'taller',     label: '🔧 Taller y Reparación' },
     ],
     scoreMap: null,
     routes: {
@@ -65,6 +71,8 @@ export const NODES = {
       hosteleria: 'hoste_tipo',
       servicios:  'serv_tipo',
       industria:  'ind_tipo',
+      peluqueria: 'peluq_agenda',
+      taller:     'taller_ordenes',
     },
   },
 
@@ -1043,6 +1051,155 @@ export const NODES = {
   },
 
   // ══════════════════════════════════════════════════════════════
+  // SECTOR: PELUQUERÍA, BARBERÍA Y ESTÉTICA
+  // ══════════════════════════════════════════════════════════════
+  peluq_agenda: {
+    id: 'peluq_agenda', phase: 'peluqueria', area: 'ventas_crm',
+    question: '¿Cómo gestionáis las citas con los clientes?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_online',          label: '✅ App con reserva online 24/7 (cliente reserva solo)' },
+      { value: 'telefono_whatsapp',   label: '📱 Por teléfono o WhatsApp' },
+      { value: 'agenda_papel',        label: '📓 Agenda en papel o libreta' },
+    ],
+    scoreMap: { app_online: 3, telefono_whatsapp: 1, agenda_papel: 0 },
+    next: 'peluq_recordatorios',
+  },
+
+  peluq_recordatorios: {
+    id: 'peluq_recordatorios', phase: 'peluqueria', area: 'ventas_crm',
+    question: '¿Enviáis recordatorios automáticos de cita a los clientes?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si_auto',   label: '✅ Sí, automáticos por SMS o WhatsApp' },
+      { value: 'si_manual', label: '⚡ Los mandamos manualmente a veces' },
+      { value: 'no',        label: '❌ No enviamos recordatorios' },
+    ],
+    scoreMap: { si_auto: 3, si_manual: 1, no: 0 },
+    next: 'peluq_noshows',
+  },
+
+  peluq_noshows: {
+    id: 'peluq_noshows', phase: 'peluqueria', area: 'ventas_crm',
+    question: '¿Cuántos clientes no aparecen a su cita sin avisar al mes (no-shows)?',
+    hint: 'Citas reservadas que simplemente no vienen', type: 'single',
+    options: [
+      { value: 'pocos',   label: '✅ Menos de 3 al mes' },
+      { value: 'algunos', label: '⚡ Entre 4 y 10 al mes' },
+      { value: 'muchos',  label: '🚨 Más de 10 al mes' },
+    ],
+    scoreMap: { pocos: 3, algunos: 1, muchos: 0 },
+    next: 'peluq_ficha',
+  },
+
+  peluq_ficha: {
+    id: 'peluq_ficha', phase: 'peluqueria', area: 'ventas_crm',
+    question: '¿Tenéis ficha digital de cada cliente con su historial de servicios y preferencias?',
+    hint: 'Qué servicios ha recibido, qué productos usa, observaciones...', type: 'single',
+    options: [
+      { value: 'si_completa', label: '✅ Sí, ficha completa con historial y preferencias' },
+      { value: 'si_basica',   label: '⚡ Solo datos básicos (nombre y teléfono)' },
+      { value: 'no',          label: '❌ No llevamos ficha de cliente' },
+    ],
+    scoreMap: { si_completa: 3, si_basica: 1, no: 0 },
+    next: 'peluq_stock',
+  },
+
+  peluq_stock: {
+    id: 'peluq_stock', phase: 'peluqueria', area: 'inventario',
+    question: '¿Controlais el stock de productos (tintes, tratamientos, cosmética de venta)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software', label: '✅ Sí, con software o app' },
+      { value: 'manual',   label: '⚡ Manualmente o en papel' },
+      { value: 'no',       label: '❌ No, pedimos cuando se acaba' },
+    ],
+    scoreMap: { software: 3, manual: 1, no: 0 },
+    next: 'peluq_margen',
+  },
+
+  peluq_margen: {
+    id: 'peluq_margen', phase: 'peluqueria', area: 'operaciones',
+    question: '¿Sabéis el coste real y el margen de cada servicio (coloración, tratamientos, etc.)?',
+    hint: 'Coste de productos + tiempo de personal vs. precio cobrado', type: 'single',
+    options: [
+      { value: 'si',    label: '✅ Sí, tenemos los costes calculados' },
+      { value: 'aprox', label: '⚡ Aproximadamente sí' },
+      { value: 'no',    label: '❌ No, los precios son por referencia del mercado' },
+    ],
+    scoreMap: { si: 3, aprox: 1, no: 0 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // SECTOR: TALLER Y REPARACIÓN
+  // ══════════════════════════════════════════════════════════════
+  taller_ordenes: {
+    id: 'taller_ordenes', phase: 'taller', area: 'operaciones',
+    question: '¿Usáis órdenes de trabajo digitales para cada reparación o intervención?',
+    hint: 'Con descripción del trabajo, piezas usadas y horas', type: 'single',
+    options: [
+      { value: 'software', label: '✅ Sí, con software específico de taller' },
+      { value: 'papel',    label: '⚡ Sí, en papel o formulario manual' },
+      { value: 'no',       label: '❌ No, todo de palabra o por WhatsApp' },
+    ],
+    scoreMap: { software: 3, papel: 1, no: 0 },
+    next: 'taller_horas',
+  },
+
+  taller_horas: {
+    id: 'taller_horas', phase: 'taller', area: 'operaciones',
+    question: '¿Registráis las horas reales de cada trabajo vs. las horas que presupuestasteis?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'siempre',  label: '✅ Sí, controlamos siempre las desviaciones' },
+      { value: 'a_veces',  label: '⚡ A veces, en los trabajos más grandes' },
+      { value: 'no',       label: '❌ No controlamos las horas reales' },
+    ],
+    scoreMap: { siempre: 3, a_veces: 1, no: 0 },
+    next: 'taller_stock',
+  },
+
+  taller_stock: {
+    id: 'taller_stock', phase: 'taller', area: 'inventario',
+    question: '¿Cómo gestionáis el stock de recambios y piezas?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software',     label: '✅ Con software de almacén' },
+      { value: 'excel_manual', label: '⚡ Con Excel o lista en papel' },
+      { value: 'sin_control',  label: '❌ Sin control formal — pedimos cuando hace falta' },
+    ],
+    scoreMap: { software: 3, excel_manual: 1, sin_control: 0 },
+    next: 'taller_presupuestos',
+  },
+
+  taller_presupuestos: {
+    id: 'taller_presupuestos', phase: 'taller', area: 'ventas_crm',
+    question: '¿Hacéis seguimiento de los presupuestos enviados que no han sido aceptados?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'siempre',  label: '✅ Sí, llamamos y hacemos seguimiento' },
+      { value: 'a_veces',  label: '⚡ A veces, cuando nos acordamos' },
+      { value: 'no',       label: '❌ No, si no responden lo damos por perdido' },
+    ],
+    scoreMap: { siempre: 3, a_veces: 1, no: 0 },
+    next: 'taller_margen',
+  },
+
+  taller_margen: {
+    id: 'taller_margen', phase: 'taller', area: 'operaciones',
+    question: '¿Conocéis el margen real de cada reparación (piezas + mano de obra vs. precio cobrado)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'siempre', label: '✅ Sí, calculamos el coste real en cada trabajo' },
+      { value: 'aprox',   label: '⚡ Aproximadamente sí' },
+      { value: 'no',      label: '❌ No, confiamos en que hay margen suficiente' },
+    ],
+    scoreMap: { siempre: 3, aprox: 1, no: 0 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
   // NODOS COMUNES — Todos los sectores terminan aquí
   // ══════════════════════════════════════════════════════════════
   common_empleados: {
@@ -1319,6 +1476,19 @@ export const NODES = {
       { value: 'nunca',   label: '❌ Casi nunca' },
     ],
     scoreMap: { diario: 3, semanal: 2, mensual: 1, nunca: 0 },
+    next: 'common_conversion_presupuestos',
+  },
+
+  common_conversion_presupuestos: {
+    id: 'common_conversion_presupuestos', phase: 'metricas', area: 'metricas',
+    question: '¿Conocéis vuestra tasa de conversión de presupuestos? (qué % de los enviados se convierten en venta)',
+    hint: 'Si envías 10 presupuestos y cierras 4, tu tasa es del 40%', type: 'single',
+    options: [
+      { value: 'si',    label: '✅ Sí, la medimos y trabajamos para mejorarla' },
+      { value: 'aprox', label: '⚡ Más o menos lo sabemos, pero no la medimos' },
+      { value: 'no',    label: '❌ No la medimos — no sabemos cuántos cerramos' },
+    ],
+    scoreMap: { si: 3, aprox: 1, no: 0 },
     next: 'common_cliente_rentable',
   },
 
