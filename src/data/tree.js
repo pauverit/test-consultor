@@ -1217,6 +1217,23 @@ export const NODES = {
       { value: 'nada',             label: '❌ Sin registro formal' },
     ],
     scoreMap: { software_erp: 3, crm_solo_ventas: 1, excel_email: 0, nada: 0 },
+    next: 'rotul_tipos_producto',
+  },
+
+  rotul_tipos_producto: {
+    id: 'rotul_tipos_producto', phase: 'rotulacion', area: null,
+    question: '¿Qué tipos de producto fabricáis habitualmente?',
+    hint: 'Puedes marcar varias opciones', type: 'multi',
+    options: [
+      { value: 'vinilo_adhesivo',   label: '🎨 Vinilo adhesivo (corte o impreso)' },
+      { value: 'lona_ojales',       label: '🏗️ Lona con ojales, perfiles o tensada' },
+      { value: 'rotulos_luminosos', label: '💡 Rótulos luminosos (cajas de luz, LED, neón flex)' },
+      { value: 'señaletica_rigida', label: '🪧 Señalética rígida (PVC, dibond, metacrilato)' },
+      { value: 'wrapping',          label: '🚗 Rotulación de vehículos (wrapping)' },
+      { value: 'roll_ups',          label: '📢 Roll-ups, displays y elementos portátiles' },
+      { value: 'lienzos',           label: '🖼️ Lienzos, bastidores y fotografía' },
+    ],
+    scoreMap: null,
     next: 'rotul_archivos_cliente',
   },
 
@@ -1230,6 +1247,19 @@ export const NODES = {
       { value: 'frecuentes',      label: '🚨 Con frecuencia hay errores, revisiones y cambios' },
     ],
     scoreMap: { siempre: 3, a_veces: 1, frecuentes: 0 },
+    next: 'rotul_icc_perfiles',
+  },
+
+  rotul_icc_perfiles: {
+    id: 'rotul_icc_perfiles', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Usáis perfiles de color (ICC) estandarizados por sustrato e impresora?',
+    hint: 'Perfiles calibrados para cada combinación de material y máquina', type: 'single',
+    options: [
+      { value: 'si_propios',  label: '✅ Sí, perfiles propios por máquina y sustrato' },
+      { value: 'genericos',   label: '⚡ Usamos perfiles genéricos del RIP' },
+      { value: 'no',          label: '❌ No gestionamos perfiles ICC' },
+    ],
+    scoreMap: { si_propios: 3, genericos: 1, no: 0 },
     next: 'rotul_nesting',
   },
 
@@ -1282,6 +1312,45 @@ export const NODES = {
       { value: 'frecuente', label: '🚨 Frecuente — más del 8% de los trabajos' },
     ],
     scoreMap: { raro: 3, alguna_vez: 1, frecuente: 0 },
+    next: 'rotul_manipulacion_checklist',
+  },
+
+  rotul_manipulacion_checklist: {
+    id: 'rotul_manipulacion_checklist', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Cómo gestionáis los acabados y manipulación tras imprimir?',
+    hint: 'Confección de lona, montaje de vinilos, enmarcado, ojelar, perfilar, laminar...', type: 'single',
+    options: [
+      { value: 'checklist_digital', label: '✅ Checklist digital por tipo de producto y acabado' },
+      { value: 'instrucciones',     label: '⚡ Instrucciones en papel o verbales por trabajo' },
+      { value: 'criterio_operario', label: '❌ Cada operario lo hace a su criterio' },
+    ],
+    scoreMap: { checklist_digital: 3, instrucciones: 1, criterio_operario: 0 },
+    next: 'rotul_tiempos_estandar',
+  },
+
+  rotul_tiempos_estandar: {
+    id: 'rotul_tiempos_estandar', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Tenéis tiempos estándar definidos por operación de manipulación?',
+    hint: 'Tiempo de ojelar lona, montar vinilo, laminar, cortar, montar caja de luz...', type: 'single',
+    options: [
+      { value: 'si_presupuesto', label: '✅ Sí, y los usamos para calcular el precio de cada trabajo' },
+      { value: 'aprox',          label: '⚡ Tiempos aproximados, pero sin registrar ni medir' },
+      { value: 'no',             label: '❌ No, presupuestamos a ojo o por experiencia' },
+    ],
+    scoreMap: { si_presupuesto: 3, aprox: 1, no: 0 },
+    next: 'rotul_hoja_ruta',
+  },
+
+  rotul_hoja_ruta: {
+    id: 'rotul_hoja_ruta', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Cada trabajo tiene una hoja de ruta con todas las fases de producción?',
+    hint: 'Diseño → Preimpresión → Impresión → Manipulación/Acabados → Instalación', type: 'single',
+    options: [
+      { value: 'digital',  label: '✅ Sí, hoja de ruta digital que siguen todos los operarios' },
+      { value: 'papel',    label: '⚡ Sí, en papel o notas adjuntas al trabajo' },
+      { value: 'verbal',   label: '❌ No, los operarios saben de palabra lo que hay que hacer' },
+    ],
+    scoreMap: { digital: 3, papel: 1, verbal: 0 },
     next: 'rotul_instalacion',
   },
 

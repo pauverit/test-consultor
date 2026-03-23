@@ -290,6 +290,24 @@ export const SAAS_MODULES = [
       ans.sector === 'rotulacion' && ans.rotul_mantenimiento === 'reactivo',
   },
   {
+    id: 'orden_trabajo_fases',
+    name: 'Órdenes de Trabajo por Fases de Producción',
+    icon: '📋',
+    description: 'Cada pedido tiene su hoja de ruta digital con todas las fases: diseño, preimpresión, impresión, manipulación/acabados e instalación. Cada operario sabe exactamente qué tiene que hacer, cuándo y cómo.',
+    beneficios: [
+      'Hoja de ruta digital por trabajo visible en tablet en el taller',
+      'Checklist de acabados por tipo de producto (lona, vinilo, caja de luz...)',
+      'Tiempos estándar por operación para presupuestar con precisión',
+      'Trazabilidad completa: quién hizo qué y cuándo en cada fase',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'rotulacion' && (
+        ans.rotul_manipulacion_checklist === 'criterio_operario' ||
+        ans.rotul_hoja_ruta === 'verbal' ||
+        ans.rotul_tiempos_estandar === 'no'
+      ),
+  },
+  {
     id: 'planificacion_produccion_rotul',
     name: 'Planificación de Producción y Cola de Trabajos',
     icon: '📅',
