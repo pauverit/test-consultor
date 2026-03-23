@@ -241,6 +241,72 @@ export const SAAS_MODULES = [
       ),
   },
   {
+    id: 'erp_rotulacion',
+    name: 'ERP Integral para Rotulación e Impresión',
+    icon: '🖥️',
+    description: 'Gestiona todo el flujo desde el presupuesto hasta la factura: pedido, diseño, producción, instalación y cobro en una sola plataforma. Sin datos duplicados ni información dispersa entre herramientas.',
+    beneficios: [
+      'Flujo completo integrado sin reintroducción de datos',
+      'Conversión automática presupuesto → orden de producción',
+      'Estado del proyecto visible para todo el equipo en tiempo real',
+      'Facturación automática al cerrar el trabajo',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'rotulacion' && (
+        ans.rotul_crm_pedidos === 'excel_email' ||
+        ans.rotul_crm_pedidos === 'nada' ||
+        ans.rotul_crm_pedidos === 'crm_solo_ventas'
+      ),
+  },
+  {
+    id: 'nesting_software',
+    name: 'Software de Nesting y Optimización de Material',
+    icon: '📐',
+    description: 'Maximiza el aprovechamiento de cada rollo o plancha con nesting automático. Ahorra un 20–30% en material y envía los trabajos directamente al plotter o cortadora.',
+    beneficios: [
+      'Ahorro de hasta un 30% en material de impresión',
+      'Optimización automática por sustrato y formato',
+      'Integración directa con plotters de corte y laminadoras',
+      'Cálculo de coste real de material por trabajo al instante',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'rotulacion' && (
+        ans.rotul_nesting === 'no' ||
+        ans.rotul_nesting === 'manual'
+      ),
+  },
+  {
+    id: 'mantenimiento_maquinaria',
+    name: 'Mantenimiento Preventivo de Maquinaria (CMMS)',
+    icon: '🔩',
+    description: 'Planifica el mantenimiento de plotters, laminadoras y equipos de corte. Alertas antes del fallo, historial de intervenciones y reducción drástica de paradas no planificadas.',
+    beneficios: [
+      'Calendario de mantenimiento preventivo por máquina',
+      'Alertas automáticas antes de que se produzcan fallos',
+      'Historial de intervenciones y costes por equipo',
+      'Reducción de paradas inesperadas hasta un 70%',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'rotulacion' && ans.rotul_mantenimiento === 'reactivo',
+  },
+  {
+    id: 'planificacion_produccion_rotul',
+    name: 'Planificación de Producción y Cola de Trabajos',
+    icon: '📅',
+    description: 'Visualiza la cola de trabajos, asigna plotters y operarios, y detecta cuellos de botella antes de que ocurran. Entregas puntuales y sin sorpresas para el cliente.',
+    beneficios: [
+      'Gantt de producción en tiempo real',
+      'Asignación de máquinas y operarios por trabajo',
+      'Alertas de cuellos de botella antes de que ocurran',
+      'Control de plazos de entrega comprometidos por cliente',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'rotulacion' && (
+        ans.rotul_planificacion === 'no' ||
+        ans.rotul_planificacion === 'hoja'
+      ),
+  },
+  {
     id: 'gestion_expedientes',
     name: 'Gestión de Expedientes y Clientes',
     icon: '📁',

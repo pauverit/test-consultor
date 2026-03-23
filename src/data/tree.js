@@ -17,6 +17,7 @@ export const PHASES = {
   industria:    { id: 'industria',    label: 'Industria y Fabricación',   icon: '🏭', color: 'from-slate-600 to-slate-800', showIntro: true },
   peluqueria:   { id: 'peluqueria',   label: 'Peluquería y Estética',     icon: '✂️', color: 'from-pink-500 to-fuchsia-600', showIntro: true },
   taller:       { id: 'taller',       label: 'Taller y Reparación',       icon: '🔧', color: 'from-zinc-600 to-zinc-800',   showIntro: true },
+  rotulacion:   { id: 'rotulacion',   label: 'Rotulación e Impresión',    icon: '🖨️', color: 'from-cyan-600 to-teal-700',   showIntro: true },
   datos_empresa:{ id: 'datos_empresa',label: 'Datos de la Empresa',       icon: '📊', color: 'from-slate-400 to-slate-600', showIntro: true },
   equipo:       { id: 'equipo',       label: 'Equipo y Procesos',         icon: '👥', color: 'from-indigo-500 to-blue-600', showIntro: true },
   facturacion:  { id: 'facturacion',  label: 'Facturación y Cobros',      icon: '💶', color: 'from-rose-500 to-pink-600', showIntro: true },
@@ -33,6 +34,7 @@ export const PHASE_DESCRIPTIONS = {
   industria:     'Veremos la planificación de producción, costes, calidad y materiales.',
   peluqueria:    'Analizaremos la gestión de citas, los no-shows, la ficha de cliente, el stock de productos y los márgenes por servicio.',
   taller:        'Revisaremos las órdenes de trabajo, el control de horas, el stock de recambios y la rentabilidad real de cada reparación.',
+  rotulacion:    'Analizaremos el flujo de pedidos, la preparación de archivos, el uso del material con nesting, el mantenimiento de maquinaria y la tasa de reprocesos.',
   datos_empresa: 'Unas preguntas básicas sobre el tamaño y madurez de la empresa para contextualizar el diagnóstico.',
   equipo:        'Cómo funciona el equipo por dentro: coordinación, comunicación interna, autonomía y los procesos del día a día.',
   facturacion:   'Ahora revisaremos el proceso de facturación y el control de cobros — una de las áreas con más fugas ocultas.',
@@ -62,6 +64,7 @@ export const NODES = {
       { value: 'industria',  label: '🏭 Industria y Fabricación' },
       { value: 'peluqueria', label: '✂️ Peluquería, Barbería y Estética' },
       { value: 'taller',     label: '🔧 Taller y Reparación' },
+      { value: 'rotulacion', label: '🖨️ Rotulación e Impresión Gran Formato' },
     ],
     scoreMap: null,
     routes: {
@@ -73,6 +76,7 @@ export const NODES = {
       industria:  'ind_tipo',
       peluqueria: 'peluq_agenda',
       taller:     'taller_ordenes',
+      rotulacion: 'rotul_crm_pedidos',
     },
   },
 
@@ -1196,6 +1200,101 @@ export const NODES = {
       { value: 'no',      label: '❌ No, confiamos en que hay margen suficiente' },
     ],
     scoreMap: { siempre: 3, aprox: 1, no: 0 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // SECTOR: ROTULACIÓN E IMPRESIÓN GRAN FORMATO
+  // ══════════════════════════════════════════════════════════════
+  rotul_crm_pedidos: {
+    id: 'rotul_crm_pedidos', phase: 'rotulacion', area: 'ventas_crm',
+    question: '¿Cómo gestionáis los presupuestos y pedidos de clientes?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software_erp',     label: '✅ ERP/CRM integrado con el flujo de producción' },
+      { value: 'crm_solo_ventas',  label: '⚡ CRM para ventas, pero sin conexión a producción' },
+      { value: 'excel_email',      label: '📄 Excel o email (sin sistema específico)' },
+      { value: 'nada',             label: '❌ Sin registro formal' },
+    ],
+    scoreMap: { software_erp: 3, crm_solo_ventas: 1, excel_email: 0, nada: 0 },
+    next: 'rotul_archivos_cliente',
+  },
+
+  rotul_archivos_cliente: {
+    id: 'rotul_archivos_cliente', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Los archivos que envían los clientes llegan preparados para imprimir?',
+    hint: 'Vectoriales correctos, perfiles de color, resolución adecuada...', type: 'single',
+    options: [
+      { value: 'siempre',         label: '✅ Sí, generalmente llegan bien preparados' },
+      { value: 'a_veces',         label: '⚡ A veces hay ajustes o errores menores' },
+      { value: 'frecuentes',      label: '🚨 Con frecuencia hay errores, revisiones y cambios' },
+    ],
+    scoreMap: { siempre: 3, a_veces: 1, frecuentes: 0 },
+    next: 'rotul_nesting',
+  },
+
+  rotul_nesting: {
+    id: 'rotul_nesting', phase: 'rotulacion', area: 'inventario',
+    question: '¿Optimizáis el uso de material con nesting automático?',
+    hint: 'Anidado de trabajos para aprovechar al máximo cada rollo o plancha', type: 'single',
+    options: [
+      { value: 'si_software', label: '✅ Sí, con software de nesting automático' },
+      { value: 'manual',      label: '⚡ Lo optimizamos manualmente en Illustrator u otro programa' },
+      { value: 'no',          label: '❌ No, imprimimos sin optimizar el material' },
+    ],
+    scoreMap: { si_software: 3, manual: 1, no: 0 },
+    next: 'rotul_planificacion',
+  },
+
+  rotul_planificacion: {
+    id: 'rotul_planificacion', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Tenéis planificación de la cola de producción (Gantt / panel de trabajos)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software', label: '✅ Sí, con panel o software digital de producción' },
+      { value: 'hoja',     label: '⚡ Sí, en hoja de cálculo o pizarra' },
+      { value: 'no',       label: '❌ No, gestionamos los trabajos sobre la marcha' },
+    ],
+    scoreMap: { software: 3, hoja: 1, no: 0 },
+    next: 'rotul_mantenimiento',
+  },
+
+  rotul_mantenimiento: {
+    id: 'rotul_mantenimiento', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Tenéis mantenimiento preventivo programado para plotters y maquinaria?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si_programado',  label: '✅ Sí, con calendario y registro de intervenciones' },
+      { value: 'reactivo',       label: '🚨 Solo intervenimos cuando hay avería' },
+      { value: 'no_maquinaria',  label: '⚡ No tenemos maquinaria propia (todo subcontratado)' },
+    ],
+    scoreMap: { si_programado: 3, reactivo: 0, no_maquinaria: 2 },
+    next: 'rotul_reprocesos',
+  },
+
+  rotul_reprocesos: {
+    id: 'rotul_reprocesos', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Con qué frecuencia hay que reimprimir un trabajo por errores de color o producción?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'raro',      label: '✅ Raro — menos del 3% de los trabajos' },
+      { value: 'alguna_vez',label: '⚡ Alguna vez — entre el 3% y el 8%' },
+      { value: 'frecuente', label: '🚨 Frecuente — más del 8% de los trabajos' },
+    ],
+    scoreMap: { raro: 3, alguna_vez: 1, frecuente: 0 },
+    next: 'rotul_instalacion',
+  },
+
+  rotul_instalacion: {
+    id: 'rotul_instalacion', phase: 'rotulacion', area: 'operaciones',
+    question: '¿Cómo gestionáis las instalaciones en el cliente?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_digital',    label: '✅ Con app o plataforma digital (registro, fotos, firma cliente)' },
+      { value: 'papel_telefono', label: '⚡ Albaranes en papel o coordinación por teléfono' },
+      { value: 'no_instalamos',  label: '— No realizamos instalaciones (solo producimos)' },
+    ],
+    scoreMap: { app_digital: 3, papel_telefono: 1, no_instalamos: 2 },
     next: 'common_empleados',
   },
 
