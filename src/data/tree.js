@@ -1463,12 +1463,12 @@ export const NODES = {
 
   common_procesos_documentados: {
     id: 'common_procesos_documentados', phase: 'equipo', area: 'equipo',
-    question: '¿Los procesos clave del negocio están documentados (protocolos, checklists, guías)?',
-    hint: 'Que cualquier empleado pueda seguirlos sin preguntarte', type: 'single',
+    question: '¿Disponéis de manuales, checklists o guías internas para que cualquier persona pueda realizar las tareas clave sin preguntarte?',
+    hint: 'Onboarding de nuevas personas, procesos de entrega, resolución de incidencias...', type: 'single',
     options: [
-      { value: 'si_todos',  label: '✅ Sí, la mayoría están escritos y actualizados' },
-      { value: 'algunos',   label: '⚡ Solo los más críticos, el resto no' },
-      { value: 'no',        label: '❌ No, todo está en la cabeza de las personas' },
+      { value: 'si_todos',  label: 'Sí, la mayoría de procesos clave están documentados y actualizados' },
+      { value: 'algunos',   label: 'Solo algunos — lo básico, pero falta mucho por documentar' },
+      { value: 'no',        label: 'No — el conocimiento está solo en la cabeza de las personas' },
     ],
     scoreMap: { si_todos: 3, algunos: 1, no: 0 },
     next: 'common_autonomia_equipo',
@@ -1476,12 +1476,12 @@ export const NODES = {
 
   common_autonomia_equipo: {
     id: 'common_autonomia_equipo', phase: 'equipo', area: 'equipo',
-    question: '¿Puede el equipo resolver incidencias del día a día sin necesitar tu intervención?',
-    hint: null, type: 'single',
+    question: '¿Qué porcentaje de las tareas del equipo está asignado y visible en algún sistema compartido (agenda, gestor de tareas, software)?',
+    hint: 'No cuenta el WhatsApp ni comunicarlo de palabra', type: 'single',
     options: [
-      { value: 'si_mayoria',  label: '✅ Sí, en la mayoría de casos actúan solos' },
-      { value: 'depende',     label: '⚡ Depende del problema, a veces sí y a veces no' },
-      { value: 'no_siempre',  label: '❌ No, casi siempre me consultan a mí' },
+      { value: 'si_mayoria',  label: 'Más del 75% — casi todo está registrado y asignado' },
+      { value: 'depende',     label: 'Entre el 25 y el 75% — lo esencial, pero hay huecos' },
+      { value: 'no_siempre',  label: 'Menos del 25% — trabajamos principalmente de forma verbal' },
     ],
     scoreMap: { si_mayoria: 3, depende: 1, no_siempre: 0 },
     next: 'common_facturacion_como',
@@ -1502,25 +1502,26 @@ export const NODES = {
 
   common_tiempo_factura: {
     id: 'common_tiempo_factura', phase: 'facturacion', area: 'facturacion',
-    question: '¿Cuánto tarda en emitirse la factura desde que se termina el trabajo o entrega?',
+    question: '¿Cuánto tiempo pasa desde que terminas un trabajo hasta que emites la factura?',
     hint: null, type: 'single',
     options: [
-      { value: 'mismo_dia',  label: '⚡ El mismo día o al día siguiente' },
-      { value: 'semana',     label: '📅 Hasta una semana' },
-      { value: 'mas_semana', label: '⏳ Más de una semana' },
+      { value: 'mismo_dia',  label: 'El mismo día o al día siguiente' },
+      { value: 'semana',     label: 'Entre 1 y 7 días' },
+      { value: 'mes',        label: 'Entre 8 y 30 días' },
+      { value: 'mas_semana', label: 'Más de 30 días' },
     ],
-    scoreMap: { mismo_dia: 3, semana: 1, mas_semana: 0 },
+    scoreMap: { mismo_dia: 3, semana: 2, mes: 1, mas_semana: 0 },
     next: 'common_olvido_factura',
   },
 
   common_olvido_factura: {
     id: 'common_olvido_factura', phase: 'facturacion', area: 'facturacion',
-    question: '¿Ha ocurrido alguna vez que se realizó un trabajo o entrega que no se facturó?',
+    question: '¿Cuántas veces al año descubres trabajos realizados que no se llegaron a facturar o se facturaron tarde por despiste?',
     hint: null, type: 'single',
     options: [
-      { value: 'si_ha_pasado', label: '🚨 Sí, nos ha pasado' },
-      { value: 'alguna_vez',   label: '⚡ Alguna vez, sin seguridad' },
-      { value: 'nunca',        label: '✅ Nunca, lo tenemos controlado' },
+      { value: 'si_ha_pasado', label: 'Más de 2 veces — nos pasa con cierta frecuencia' },
+      { value: 'alguna_vez',   label: '1 o 2 veces al año' },
+      { value: 'nunca',        label: 'Nunca, tenemos proceso claro para evitarlo' },
     ],
     scoreMap: { si_ha_pasado: 0, alguna_vez: 1, nunca: 3 },
     next: 'common_cobros',
@@ -1528,12 +1529,12 @@ export const NODES = {
 
   common_cobros: {
     id: 'common_cobros', phase: 'facturacion', area: 'facturacion',
-    question: '¿Tenéis control actualizado de las facturas pendientes de cobro?',
+    question: '¿Tenéis un sistema para registrar qué facturas están pendientes de cobro, su vencimiento y los retrasos?',
     hint: null, type: 'single',
     options: [
-      { value: 'software',    label: '✅ Sí, con software y alertas automáticas' },
-      { value: 'manualmente', label: '📄 Sí, pero manualmente' },
-      { value: 'no',          label: '❌ No lo controlamos bien' },
+      { value: 'software',    label: 'Sí, con software y alertas automáticas de vencimiento' },
+      { value: 'manualmente', label: 'Sí, pero lo revisamos de forma manual y periódica' },
+      { value: 'no',          label: 'No lo controlamos de forma sistemática' },
     ],
     scoreMap: { software: 3, manualmente: 1, no: 0 },
     next: 'common_impagos',
@@ -1541,12 +1542,12 @@ export const NODES = {
 
   common_impagos: {
     id: 'common_impagos', phase: 'facturacion', area: 'facturacion',
-    question: '¿Tenéis facturas impagadas que no habéis reclamado?',
+    question: '¿Qué porcentaje aproximado de tu facturación mensual se cobra con más de 30 días de retraso respecto al vencimiento?',
     hint: null, type: 'single',
     options: [
-      { value: 'si_varios', label: '🚨 Sí, varios casos sin gestionar' },
-      { value: 'alguno',    label: '⚡ Alguno puntual' },
-      { value: 'no',        label: '✅ No, los gestionamos todos' },
+      { value: 'si_varios', label: 'Más del 30% — es un problema habitual' },
+      { value: 'alguno',    label: 'Entre el 10 y el 30%' },
+      { value: 'no',        label: 'Menos del 10% — lo tenemos controlado' },
     ],
     scoreMap: { si_varios: 0, alguno: 1, no: 3 },
     next: 'common_horas_admin',
@@ -1568,12 +1569,12 @@ export const NODES = {
 
   common_vacaciones: {
     id: 'common_vacaciones', phase: 'tiempo', area: 'tiempo',
-    question: '¿Puedes desconectar del negocio durante las vacaciones?',
-    hint: null, type: 'single',
+    question: '¿Cuánto tiempo semanal dedicas a tareas de alto valor — estrategia, mejora del negocio, alianzas, nuevos servicios — frente a tareas operativas urgentes?',
+    hint: 'Trabajo estratégico = el que solo tú puedes hacer y que mueve el negocio hacia adelante', type: 'single',
     options: [
-      { value: 'si',       label: '✅ Sí, sin problema' },
-      { value: 'con_dif',  label: '⚡ Con dificultad, sigo pendiente' },
-      { value: 'no_puedo', label: '❌ No puedo desconectar' },
+      { value: 'si',       label: 'Más del 25% de mi tiempo semanal' },
+      { value: 'con_dif',  label: 'Entre el 10 y el 25%' },
+      { value: 'no_puedo', label: 'Menos del 10% — casi todo es apagar fuegos' },
     ],
     scoreMap: { si: 3, con_dif: 1, no_puedo: 0 },
     next: 'common_cuello_botella',
@@ -1581,12 +1582,12 @@ export const NODES = {
 
   common_cuello_botella: {
     id: 'common_cuello_botella', phase: 'tiempo', area: 'tiempo',
-    question: '¿Hay muchas cosas que solo puedes hacer tú en el negocio?',
-    hint: 'Si te vas, el negocio se para o va peor', type: 'single',
+    question: '¿Cuántas decisiones del día a día requieren tu aprobación directa? (descuentos, compras, resolución de incidencias, respuestas a clientes...)',
+    hint: null, type: 'single',
     options: [
-      { value: 'muchas',    label: '🚨 Muchas — soy imprescindible en casi todo' },
-      { value: 'pocas',     label: '⚡ Algunas cosas clave' },
-      { value: 'casi_nada', label: '✅ Casi nada, está bien delegado' },
+      { value: 'muchas',    label: 'La mayoría pasan por mí — soy el cuello de botella' },
+      { value: 'pocas',     label: 'Varias al día, solo las más importantes' },
+      { value: 'casi_nada', label: 'Casi ninguna — el equipo actúa con autonomía' },
     ],
     scoreMap: { muchas: 0, pocas: 1, casi_nada: 3 },
     next: 'common_interrupciones',
@@ -1594,14 +1595,15 @@ export const NODES = {
 
   common_interrupciones: {
     id: 'common_interrupciones', phase: 'tiempo', area: 'tiempo',
-    question: '¿Cuántas veces al día recibes interrupciones que te impiden concentrarte en trabajo importante?',
-    hint: 'Llamadas, consultas, WhatsApp, urgencias inesperadas...', type: 'single',
+    question: '¿Cuántas veces al día recibes interrupciones que te sacan de tareas importantes? (llamadas, consultas internas, WhatsApp, urgencias...)',
+    hint: null, type: 'single',
     options: [
-      { value: 'casi_nunca', label: '✅ Pocas — puedo trabajar con concentración' },
-      { value: 'algunas',    label: '⚡ Algunas (3-6 veces al día)' },
-      { value: 'muchas',     label: '🚨 Constantemente — raramente termino algo sin interrupciones' },
+      { value: 'casi_nunca', label: '0 a 2 veces — puedo trabajar con concentración' },
+      { value: 'algunas',    label: '3 a 5 veces al día' },
+      { value: 'frecuentes', label: '6 a 10 veces al día' },
+      { value: 'muchas',     label: 'Más de 10 — raramente termino algo sin interrupciones' },
     ],
-    scoreMap: { casi_nunca: 3, algunas: 1, muchas: 0 },
+    scoreMap: { casi_nunca: 3, algunas: 2, frecuentes: 1, muchas: 0 },
     next: 'common_tarea_repetida',
   },
 
@@ -1622,12 +1624,12 @@ export const NODES = {
 
   common_panel_kpi: {
     id: 'common_panel_kpi', phase: 'metricas', area: 'metricas',
-    question: '¿Tenéis un panel con los indicadores clave del negocio?',
-    hint: 'Facturación, margen, cobros, clientes nuevos...', type: 'single',
+    question: '¿Tenéis un panel o cuadro de mando donde veáis de un vistazo las métricas clave del negocio?',
+    hint: 'Ventas, margen, cobros pendientes, productividad, clientes nuevos...', type: 'single',
     options: [
-      { value: 'si_lo_uso',  label: '✅ Sí, actualizado y lo consulto regularmente' },
-      { value: 'si_no_miro', label: '📊 Tengo algo pero no lo miro habitualmente' },
-      { value: 'no',         label: '❌ No tenemos nada así' },
+      { value: 'si_lo_uso',  label: 'Sí, automatizado y lo consulto cada semana' },
+      { value: 'si_no_miro', label: 'Tengo algo montado pero rara vez lo consulto' },
+      { value: 'no',         label: 'No, los datos están dispersos y no hay panel centralizado' },
     ],
     scoreMap: { si_lo_uso: 3, si_no_miro: 1, no: 0 },
     next: 'common_frecuencia_numeros',
@@ -1635,13 +1637,13 @@ export const NODES = {
 
   common_frecuencia_numeros: {
     id: 'common_frecuencia_numeros', phase: 'metricas', area: 'metricas',
-    question: '¿Con qué frecuencia revisas los números del negocio?',
+    question: '¿Con qué facilidad puedes saber si este mes estás mejor o peor que el mes pasado en ventas, margen y liquidez?',
     hint: null, type: 'single',
     options: [
-      { value: 'diario',  label: '✅ A diario' },
-      { value: 'semanal', label: '⚡ Semanalmente' },
-      { value: 'mensual', label: '📅 Mensualmente' },
-      { value: 'nunca',   label: '❌ Casi nunca' },
+      { value: 'diario',  label: 'En pocos minutos — tengo los datos al día' },
+      { value: 'semanal', label: 'Con algo de esfuerzo — hay que buscarlo' },
+      { value: 'mensual', label: 'Solo al final del mes cuando lo calculo a mano' },
+      { value: 'nunca',   label: 'No lo sé con certeza — lo intuyo' },
     ],
     scoreMap: { diario: 3, semanal: 2, mensual: 1, nunca: 0 },
     next: 'common_conversion_presupuestos',
@@ -1649,12 +1651,12 @@ export const NODES = {
 
   common_conversion_presupuestos: {
     id: 'common_conversion_presupuestos', phase: 'metricas', area: 'metricas',
-    question: '¿Conocéis vuestra tasa de conversión de presupuestos? (qué % de los enviados se convierten en venta)',
+    question: '¿Medís la tasa de conversión de presupuestos? (de cada 10 enviados, cuántos se convierten en venta)',
     hint: 'Si envías 10 presupuestos y cierras 4, tu tasa es del 40%', type: 'single',
     options: [
-      { value: 'si',    label: '✅ Sí, la medimos y trabajamos para mejorarla' },
-      { value: 'aprox', label: '⚡ Más o menos lo sabemos, pero no la medimos' },
-      { value: 'no',    label: '❌ No la medimos — no sabemos cuántos cerramos' },
+      { value: 'si',    label: 'Sí, la medimos con datos claros y la revisamos periódicamente' },
+      { value: 'aprox', label: 'Lo estimamos de memoria pero no hay un registro formal' },
+      { value: 'no',    label: 'No la medimos — no sabemos exactamente cuántos cerramos' },
     ],
     scoreMap: { si: 3, aprox: 1, no: 0 },
     next: 'common_cliente_rentable',
@@ -1662,12 +1664,12 @@ export const NODES = {
 
   common_cliente_rentable: {
     id: 'common_cliente_rentable', phase: 'metricas', area: 'metricas',
-    question: '¿Sabes cuál es tu cliente más rentable y cuál te quita dinero?',
+    question: '¿Tienes identificados cuáles son tus clientes o proyectos más rentables y cuáles apenas dejan margen (o generan pérdidas)?',
     hint: null, type: 'single',
     options: [
-      { value: 'si_exacto', label: '✅ Sí, lo tengo claro' },
-      { value: 'aprox',     label: '⚡ Más o menos, por intuición' },
-      { value: 'no',        label: '❌ No lo sé' },
+      { value: 'si_exacto', label: 'Sí, lo tengo calculado con datos reales de margen por cliente' },
+      { value: 'aprox',     label: 'Lo intuyo pero no hay un cálculo formal que lo respalde' },
+      { value: 'no',        label: 'No lo sé — todos los clientes me parecen similares' },
     ],
     scoreMap: { si_exacto: 3, aprox: 1, no: 0 },
     next: 'common_coste_captacion',
@@ -1675,12 +1677,12 @@ export const NODES = {
 
   common_coste_captacion: {
     id: 'common_coste_captacion', phase: 'metricas', area: 'metricas',
-    question: '¿Sabéis cuánto os cuesta captar un nuevo cliente (publicidad, comerciales, tiempo)?',
+    question: '¿Sabéis cuánto os cuesta de media conseguir un nuevo cliente? (inversión en marketing, tiempo de comerciales, descuentos...)',
     hint: null, type: 'single',
     options: [
-      { value: 'si_exacto', label: '✅ Sí, lo medimos y lo optimizamos' },
-      { value: 'aprox',     label: '⚡ Más o menos lo sabemos' },
-      { value: 'no',        label: '❌ No lo medimos' },
+      { value: 'si_exacto', label: 'Sí, lo tenemos calculado con datos y lo optimizamos' },
+      { value: 'aprox',     label: 'Lo estimamos de memoria pero no hay un dato exacto' },
+      { value: 'no',        label: 'No lo medimos — no sabemos qué cuesta captar un cliente' },
     ],
     scoreMap: { si_exacto: 3, aprox: 1, no: 0 },
     next: null, // ← FIN → Mostrar resultados

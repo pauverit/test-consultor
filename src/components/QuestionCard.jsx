@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 
 const variants = {
@@ -7,9 +7,34 @@ const variants = {
   exit:  (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
 }
 
+// Elimina emojis del inicio de la etiqueta para evitar sesgo visual
+// (✅ = buena, ❌ = mala, ⚡ = intermedia, etc.)
+function stripEmojis(str) {
+  return str.replace(/\p{Extended_Pictographic}\uFE0F?\s*/gu, '').trim()
+}
+
+// Shuffle de Fisher-Yates — se ejecuta una vez por montaje del componente
+function shuffleArray(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export default function QuestionCard({ node, nodeId, value, onChange, onNext, onBack, direction = 1, isFirst }) {
   const [localMulti, setLocalMulti] = useState(
     node.type === 'multi' ? (Array.isArray(value) ? value : []) : []
+  )
+
+  // Barajar opciones aleatoriamente al montar la pregunta.
+  // Depende de nodeId para que sea estable si el padre re-renderiza
+  // sin cambiar de pregunta.
+  const shuffledOptions = useMemo(
+    () => shuffleArray(node.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodeId]
   )
 
   function handleSingle(optVal) {
@@ -57,7 +82,7 @@ export default function QuestionCard({ node, nodeId, value, onChange, onNext, on
       {/* Opciones single */}
       {node.type === 'single' && (
         <div className="space-y-3">
-          {node.options.map(opt => (
+          {shuffledOptions.map(opt => (
             <button
               key={opt.value}
               className={`option-btn ${value === opt.value ? 'selected' : ''}`}
@@ -71,7 +96,7 @@ export default function QuestionCard({ node, nodeId, value, onChange, onNext, on
                 ) : (
                   <span className="w-5 h-5 rounded-full border-2 border-slate-300 flex-shrink-0" />
                 )}
-                {opt.label}
+                {stripEmojis(opt.label)}
               </span>
             </button>
           ))}
@@ -81,7 +106,7 @@ export default function QuestionCard({ node, nodeId, value, onChange, onNext, on
       {/* Opciones multi */}
       {node.type === 'multi' && (
         <div className="space-y-3">
-          {node.options.map(opt => {
+          {shuffledOptions.map(opt => {
             const selected = localMulti.includes(opt.value)
             return (
               <button
@@ -99,7 +124,7 @@ export default function QuestionCard({ node, nodeId, value, onChange, onNext, on
                       </svg>
                     )}
                   </span>
-                  {opt.label}
+                  {stripEmojis(opt.label)}
                 </span>
               </button>
             )
