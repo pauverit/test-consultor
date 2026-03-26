@@ -17,7 +17,11 @@ export const SAAS_MODULES = [
       ans.reformas_seguimiento === 'nunca' ||
       ans.reformas_seguimiento === 'a_veces' ||
       ans.comercio_fidelizacion === 'no' ||
-      ans.serv_agenda === 'si_manual',
+      ans.serv_agenda === 'si_manual' ||
+      (ans.sector === 'fontaneria' && ans.font_seguimiento_presupuesto === 'nunca') ||
+      (ans.sector === 'electricidad' && ans.elec_seguimiento === 'nunca') ||
+      (ans.sector === 'fontaneria' && ans.font_contratos_mantenimiento === 'no') ||
+      (ans.sector === 'electricidad' && ans.elec_contratos_mant === 'no'),
   },
   {
     id: 'presupuestador',
@@ -34,7 +38,9 @@ export const SAAS_MODULES = [
       ans.reformas_presupuesto_como === 'excel' ||
       ans.reformas_presupuesto_como === 'manual' ||
       ans.reformas_tiempo_presupuesto === 'mas1dia' ||
-      ans.reformas_tiempo_presupuesto === '2a8h',
+      ans.reformas_tiempo_presupuesto === '2a8h' ||
+      (ans.sector === 'fontaneria' && (ans.font_presupuesto === 'excel' || ans.font_presupuesto === 'manual' || ans.font_presupuesto === 'de_palabra')) ||
+      (ans.sector === 'electricidad' && (ans.elec_presupuesto === 'excel' || ans.elec_presupuesto === 'manual' || ans.elec_presupuesto === 'de_palabra')),
   },
   {
     id: 'gestion_obras',
@@ -113,7 +119,11 @@ export const SAAS_MODULES = [
       ans.comercio_alertas_stock === 'no' ||
       ans.comercio_dist_rotura === 'frecuente' ||
       (ans.sector === 'peluqueria' && ans.peluq_stock !== 'software') ||
-      (ans.sector === 'taller' && ans.taller_stock === 'sin_control'),
+      (ans.sector === 'taller' && ans.taller_stock === 'sin_control') ||
+      (ans.sector === 'fontaneria' && (ans.font_stock_furgoneta === 'mental' || ans.font_stock_furgoneta === 'no')) ||
+      (ans.sector === 'electricidad' && (ans.elec_stock_materiales === 'mental' || ans.elec_stock_materiales === 'no')) ||
+      (ans.sector === 'autoventa' && (ans.auto_stock_furgoneta === 'periodico' || ans.auto_stock_furgoneta === 'no')) ||
+      (ans.sector === 'panaderia' && (ans.pana_pedidos_proveedores === 'whatsapp_tel' || ans.pana_pedidos_proveedores === 'falta')),
   },
   {
     id: 'tpv_hosteleria',
@@ -340,6 +350,115 @@ export const SAAS_MODULES = [
         ans.serv_expedientes === 'carpetas_pc' ||
         ans.serv_expedientes === 'papel' ||
         ans.serv_comunicacion_estado === 'esperan'
+      ),
+  },
+  {
+    id: 'partes_trabajo_movil',
+    name: 'Partes de Trabajo Digitales desde Móvil',
+    icon: '📱',
+    description: 'El técnico registra cada intervención desde el móvil: materiales usados, horas, fotos y firma del cliente. La oficina ve el parte en tiempo real y puede facturar el mismo día.',
+    beneficios: [
+      'Parte digital con firma del cliente en el momento',
+      'Registro de materiales usados imputados al trabajo',
+      'Fotos del trabajo antes y después adjuntas',
+      'Facturación automática al cerrar el parte',
+    ],
+    trigger: (ans) =>
+      (ans.sector === 'fontaneria' && (ans.font_partes_trabajo === 'papel' || ans.font_partes_trabajo === 'a_veces' || ans.font_partes_trabajo === 'no')) ||
+      (ans.sector === 'electricidad' && (ans.elec_partes === 'papel' || ans.elec_partes === 'solo_grandes' || ans.elec_partes === 'no')),
+  },
+  {
+    id: 'contratos_mant_campo',
+    name: 'Gestión de Contratos de Mantenimiento Recurrente',
+    icon: '🔄',
+    description: 'Crea una cartera de contratos de mantenimiento con facturación automática mensual. Programa las visitas preventivas y controla el historial de intervenciones por cliente.',
+    beneficios: [
+      'Facturación recurrente automática cada mes',
+      'Agenda de revisiones preventivas con alertas',
+      'Historial de cada instalación por cliente',
+      'Recordatorio de renovación antes del vencimiento',
+    ],
+    trigger: (ans) =>
+      (ans.sector === 'fontaneria' && (ans.font_contratos_mantenimiento === 'no' || ans.font_contratos_mantenimiento === 'alguno')) ||
+      (ans.sector === 'electricidad' && (ans.elec_contratos_mant === 'no' || ans.elec_contratos_mant === 'alguno')),
+  },
+  {
+    id: 'app_autoventa',
+    name: 'App de Autoventa y Gestión de Rutas',
+    icon: '🚐',
+    description: 'El vendedor gestiona toda la ruta desde el móvil: hoja de ruta optimizada, albaranes digitales, cobros con datáfono y stock de furgoneta en tiempo real. La oficina ve todo sin esperar.',
+    beneficios: [
+      'Hoja de ruta optimizada con visitas y objetivos del día',
+      'Albarán digital con firma del cliente en el momento',
+      'Stock de furgoneta actualizado con cada venta',
+      'Liquidación automática de cobros al final de jornada',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'autoventa' && (
+        ans.auto_hoja_ruta === 'papel' ||
+        ans.auto_hoja_ruta === 'criterio_propio' ||
+        ans.auto_pedidos_albaranes === 'papel_trae' ||
+        ans.auto_pedidos_albaranes === 'whatsapp_foto' ||
+        ans.auto_pedidos_albaranes === 'no_registro' ||
+        ans.auto_cobros_ruta === 'efectivo_sin' ||
+        ans.auto_cobros_ruta === 'fiado'
+      ),
+  },
+  {
+    id: 'erp_autoventa',
+    name: 'ERP con Módulo de Distribución y Autoventa',
+    icon: '🏭',
+    description: 'Integra el almacén central, las furgonetas y la facturación en una sola plataforma. Sincronización automática al final de jornada, control de rutas y rentabilidad por vendedor.',
+    beneficios: [
+      'Sincronización automática furgoneta ↔ almacén',
+      'Rentabilidad real por ruta y por vendedor',
+      'Control de devoluciones con stock automático',
+      'Dashboard de ventas en tiempo real por responsable',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'autoventa' && (
+        ans.auto_sincronizacion === 'manual_picar' ||
+        ans.auto_sincronizacion === 'no_erp' ||
+        ans.auto_objetivos === 'no' ||
+        ans.auto_visibilidad === 'no' ||
+        ans.auto_visibilidad === 'reunion'
+      ),
+  },
+  {
+    id: 'gestion_obrador',
+    name: 'Software de Gestión para Panadería y Obrador',
+    icon: '🍞',
+    description: 'Planifica la producción según los pedidos del día, controla el coste por receta con escandallos automáticos y gestiona el reparto a clientes de hostelería desde una sola herramienta.',
+    beneficios: [
+      'Planificación de hornadas cruzada con pedidos del día',
+      'Escandallo automático: coste real por producto',
+      'Control de mermas y ajuste automático de producción',
+      'Gestión de pedidos de hostelería con albarán digital',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'panaderia' && (
+        ans.pana_planificacion_hornadas === 'inercia' ||
+        ans.pana_planificacion_hornadas === 'responsable' ||
+        ans.pana_escandallos === 'estimados' ||
+        ans.pana_escandallos === 'no' ||
+        ans.pana_mermas === 'no'
+      ),
+  },
+  {
+    id: 'trazabilidad_alergenos',
+    name: 'Trazabilidad y Control de Alérgenos',
+    icon: '⚠️',
+    description: 'Cumple con la normativa de alérgenos: fichas de producto actualizadas, trazabilidad de lotes y etiquetado automático. Evita sanciones y protege a tus clientes.',
+    beneficios: [
+      'Fichas de alérgenos por producto actualizadas automáticamente',
+      'Trazabilidad de lote de materias primas',
+      'Etiquetado automático conforme a normativa',
+      'Registro de auditorías de higiene alimentaria',
+    ],
+    trigger: (ans) =>
+      ans.sector === 'panaderia' && (
+        ans.pana_trazabilidad_alergenos === 'parcial' ||
+        ans.pana_trazabilidad_alergenos === 'no'
       ),
   },
 ]

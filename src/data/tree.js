@@ -18,6 +18,10 @@ export const PHASES = {
   peluqueria:   { id: 'peluqueria',   label: 'Peluquería y Estética',     icon: '✂️', color: 'from-pink-500 to-fuchsia-600', showIntro: true },
   taller:       { id: 'taller',       label: 'Taller y Reparación',       icon: '🔧', color: 'from-zinc-600 to-zinc-800',   showIntro: true },
   rotulacion:   { id: 'rotulacion',   label: 'Rotulación e Impresión',    icon: '🖨️', color: 'from-cyan-600 to-teal-700',   showIntro: true },
+  fontaneria:   { id: 'fontaneria',   label: 'Fontanería y Climatización',icon: '🔩', color: 'from-blue-600 to-cyan-700',   showIntro: true },
+  electricidad: { id: 'electricidad', label: 'Electricidad e Instalaciones',icon: '⚡', color: 'from-yellow-500 to-amber-600', showIntro: true },
+  autoventa:    { id: 'autoventa',    label: 'Autoventa y Distribución',  icon: '🚐', color: 'from-green-600 to-emerald-700', showIntro: true },
+  panaderia:    { id: 'panaderia',    label: 'Panadería y Obrador',       icon: '🍞', color: 'from-amber-600 to-orange-700',  showIntro: true },
   datos_empresa:{ id: 'datos_empresa',label: 'Datos de la Empresa',       icon: '📊', color: 'from-slate-400 to-slate-600', showIntro: true },
   equipo:       { id: 'equipo',       label: 'Equipo y Procesos',         icon: '👥', color: 'from-indigo-500 to-blue-600', showIntro: true },
   facturacion:  { id: 'facturacion',  label: 'Facturación y Cobros',      icon: '💶', color: 'from-rose-500 to-pink-600', showIntro: true },
@@ -35,6 +39,10 @@ export const PHASE_DESCRIPTIONS = {
   peluqueria:    'Analizaremos la gestión de citas, los no-shows, la ficha de cliente, el stock de productos y los márgenes por servicio.',
   taller:        'Revisaremos las órdenes de trabajo, el control de horas, el stock de recambios y la rentabilidad real de cada reparación.',
   rotulacion:    'Analizaremos el flujo de pedidos, la preparación de archivos, el uso del material con nesting, el mantenimiento de maquinaria y la tasa de reprocesos.',
+  fontaneria:    'Revisaremos cómo gestionas los avisos y urgencias, los partes de trabajo, el stock en furgoneta, los presupuestos y los contratos de mantenimiento.',
+  electricidad:  'Analizaremos la gestión de trabajos, los partes digitales, el control de materiales, la documentación técnica y los contratos de mantenimiento recurrente.',
+  autoventa:     'Revisaremos la hoja de ruta, el stock en furgoneta, los albaranes, los cobros en ruta, las devoluciones y la visibilidad del responsable.',
+  panaderia:     'Analizaremos la planificación de hornadas, el escandallo de productos, el control de mermas, los pedidos de clientes y la rentabilidad real del obrador.',
   datos_empresa: 'Unas preguntas básicas sobre el tamaño y madurez de la empresa para contextualizar el diagnóstico.',
   equipo:        'Cómo funciona el equipo por dentro: coordinación, comunicación interna, autonomía y los procesos del día a día.',
   facturacion:   'Ahora revisaremos el proceso de facturación y el control de cobros — una de las áreas con más fugas ocultas.',
@@ -64,19 +72,27 @@ export const NODES = {
       { value: 'industria',  label: '🏭 Industria y Fabricación' },
       { value: 'peluqueria', label: '✂️ Peluquería, Barbería y Estética' },
       { value: 'taller',     label: '🔧 Taller y Reparación' },
-      { value: 'rotulacion', label: '🖨️ Rotulación e Impresión Gran Formato' },
+      { value: 'rotulacion',   label: '🖨️ Rotulación e Impresión Gran Formato' },
+      { value: 'fontaneria',   label: '🔩 Fontanería, Climatización y Saneamiento' },
+      { value: 'electricidad', label: '⚡ Electricidad e Instalaciones' },
+      { value: 'autoventa',    label: '🚐 Autoventa y Distribución en Ruta' },
+      { value: 'panaderia',    label: '🍞 Panadería, Obrador y Pastelería' },
     ],
     scoreMap: null,
     routes: {
-      reformas:   'reformas_tipo_cliente',
-      comercio:   'comercio_canal',
-      tecnologia: 'tech_tipo',
-      hosteleria: 'hoste_tipo',
-      servicios:  'serv_tipo',
-      industria:  'ind_tipo',
-      peluqueria: 'peluq_agenda',
-      taller:     'taller_ordenes',
-      rotulacion: 'rotul_crm_pedidos',
+      reformas:     'reformas_tipo_cliente',
+      comercio:     'comercio_canal',
+      tecnologia:   'tech_tipo',
+      hosteleria:   'hoste_tipo',
+      servicios:    'serv_tipo',
+      industria:    'ind_tipo',
+      peluqueria:   'peluq_agenda',
+      taller:       'taller_ordenes',
+      rotulacion:   'rotul_crm_pedidos',
+      fontaneria:   'font_tipo_trabajo',
+      electricidad: 'elec_tipo_trabajo',
+      autoventa:    'auto_tipo',
+      panaderia:    'pana_tipo',
     },
   },
 
@@ -1364,6 +1380,540 @@ export const NODES = {
       { value: 'no_instalamos',  label: '— No realizamos instalaciones (solo producimos)' },
     ],
     scoreMap: { app_digital: 3, papel_telefono: 1, no_instalamos: 2 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // SECTOR: FONTANERÍA, CLIMATIZACIÓN Y SANEAMIENTO
+  // ══════════════════════════════════════════════════════════════
+  font_tipo_trabajo: {
+    id: 'font_tipo_trabajo', phase: 'fontaneria', area: null,
+    question: '¿Cuál es el tipo de trabajo principal de tu empresa?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'instalaciones', label: '🏗️ Instalaciones nuevas (fontanería, gas, climatización)' },
+      { value: 'mantenimiento', label: '🔧 Mantenimiento y averías (particulares y comunidades)' },
+      { value: 'rehabilitacion', label: '🏠 Rehabilitación y reformas (renovación de instalaciones)' },
+      { value: 'mixto',          label: '🔄 Combinamos instalaciones, mantenimiento y averías' },
+    ],
+    scoreMap: null,
+    next: 'font_avisos_urgencias',
+  },
+
+  font_avisos_urgencias: {
+    id: 'font_avisos_urgencias', phase: 'fontaneria', area: 'operaciones',
+    question: '¿Cómo gestionáis los avisos, llamadas de urgencia y asignación de técnicos?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_software',   label: '✅ Con app o software (aviso → técnico → parte digital)' },
+      { value: 'telefono_papel', label: '⚡ Teléfono + papel o libreta' },
+      { value: 'whatsapp',       label: '📱 Por WhatsApp entre el responsable y los técnicos' },
+      { value: 'sin_sistema',    label: '❌ Sin sistema — cada técnico gestiona los suyos' },
+    ],
+    scoreMap: { app_software: 3, telefono_papel: 1, whatsapp: 0, sin_sistema: 0 },
+    next: 'font_partes_trabajo',
+  },
+
+  font_partes_trabajo: {
+    id: 'font_partes_trabajo', phase: 'fontaneria', area: 'operaciones',
+    question: '¿Se hace un parte de trabajo por cada intervención?',
+    hint: 'Registro de qué se hizo, qué materiales se usaron, tiempo empleado y firma del cliente', type: 'single',
+    options: [
+      { value: 'digital_firma',  label: '✅ Parte digital con firma del cliente desde el móvil' },
+      { value: 'papel',          label: '⚡ Parte en papel que se trae a la oficina' },
+      { value: 'a_veces',        label: '🚨 Solo para trabajos grandes, no siempre' },
+      { value: 'no',             label: '❌ No, no se registra formalmente cada intervención' },
+    ],
+    scoreMap: { digital_firma: 3, papel: 1, a_veces: 0, no: 0 },
+    next: 'font_presupuesto',
+  },
+
+  font_presupuesto: {
+    id: 'font_presupuesto', phase: 'fontaneria', area: 'presupuestacion',
+    question: '¿Cómo hacéis los presupuestos de trabajos y obras?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software',    label: '✅ Software de presupuestación con materiales y tiempos' },
+      { value: 'excel',       label: '📄 Excel o plantilla propia' },
+      { value: 'manual',      label: '📝 A mano o por email' },
+      { value: 'de_palabra',  label: '❌ De palabra o sobre la marcha sin documento' },
+    ],
+    scoreMap: { software: 3, excel: 1, manual: 0, de_palabra: 0 },
+    next: 'font_seguimiento_presupuesto',
+  },
+
+  font_seguimiento_presupuesto: {
+    id: 'font_seguimiento_presupuesto', phase: 'fontaneria', area: 'ventas_crm',
+    question: '¿Hacéis seguimiento de los presupuestos enviados que no han respondido?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'sistematico',  label: '✅ Sí, con recordatorio automático o calendario de seguimiento' },
+      { value: 'a_veces',      label: '⚡ A veces, si nos acordamos o el cliente es importante' },
+      { value: 'nunca',        label: '❌ No, enviamos el presupuesto y esperamos que respondan' },
+    ],
+    scoreMap: { sistematico: 3, a_veces: 1, nunca: 0 },
+    next: 'font_stock_furgoneta',
+  },
+
+  font_stock_furgoneta: {
+    id: 'font_stock_furgoneta', phase: 'fontaneria', area: 'inventario',
+    question: '¿Cómo controlas el stock de materiales en furgoneta y almacén?',
+    hint: 'Tubería, codos, llaves, latiguillos, kit de emergencia...', type: 'single',
+    options: [
+      { value: 'software_sync',  label: '✅ Software sincronizado entre furgoneta y almacén central' },
+      { value: 'excel_revision', label: '⚡ Excel o revisión manual periódica' },
+      { value: 'mental',         label: '🚨 Cada técnico sabe lo que lleva, sin registro formal' },
+      { value: 'no',             label: '❌ Sin control — se compra cuando falta algo' },
+    ],
+    scoreMap: { software_sync: 3, excel_revision: 1, mental: 0, no: 0 },
+    next: 'font_imputacion_materiales',
+  },
+
+  font_imputacion_materiales: {
+    id: 'font_imputacion_materiales', phase: 'fontaneria', area: 'operaciones',
+    question: '¿Los materiales usados en cada trabajo se registran e imputan a ese trabajo?',
+    hint: 'Para conocer el coste real y facturar correctamente los materiales al cliente', type: 'single',
+    options: [
+      { value: 'siempre',     label: '✅ Sí, siempre — cada material queda imputado al trabajo' },
+      { value: 'grandes',     label: '⚡ Solo en trabajos grandes o instalaciones' },
+      { value: 'no',          label: '❌ No — los materiales van al gasto general sin imputar' },
+    ],
+    scoreMap: { siempre: 3, grandes: 1, no: 0 },
+    next: 'font_contratos_mantenimiento',
+  },
+
+  font_contratos_mantenimiento: {
+    id: 'font_contratos_mantenimiento', phase: 'fontaneria', area: 'ventas_crm',
+    question: '¿Tienes contratos de mantenimiento recurrente con clientes (comunidades, empresas, particulares)?',
+    hint: 'Revisiones periódicas, mantenimiento de calderas, comunidades...', type: 'single',
+    options: [
+      { value: 'si_gestionado', label: '✅ Sí, con cartera activa y gestión de renovaciones' },
+      { value: 'alguno',        label: '⚡ Alguno, pero sin gestionarlos activamente' },
+      { value: 'no',            label: '❌ No tenemos contratos de mantenimiento recurrente' },
+    ],
+    scoreMap: { si_gestionado: 3, alguno: 1, no: 0 },
+    next: 'font_cobros',
+  },
+
+  font_cobros: {
+    id: 'font_cobros', phase: 'fontaneria', area: 'facturacion',
+    question: '¿Cómo cobras los trabajos pequeños o de urgencia realizados en campo?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_factura',  label: '✅ Con app — genero albarán o factura en el momento' },
+      { value: 'datafono',     label: '⚡ Datáfono, pero factura después en oficina' },
+      { value: 'efectivo_sin', label: '🚨 Efectivo sin factura ni albarán en el momento' },
+      { value: 'fiado',        label: '❌ Muchos trabajos quedan fiados o sin cobrar en el momento' },
+    ],
+    scoreMap: { app_factura: 3, datafono: 1, efectivo_sin: 0, fiado: 0 },
+    next: 'font_margen_trabajo',
+  },
+
+  font_margen_trabajo: {
+    id: 'font_margen_trabajo', phase: 'fontaneria', area: 'metricas',
+    question: '¿Conoces el margen real de cada trabajo (materiales + horas de técnico)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si',     label: '✅ Sí — calculo coste real y margen por trabajo' },
+      { value: 'aprox',  label: '⚡ Aproximadamente, pero sin datos exactos' },
+      { value: 'no',     label: '❌ No — desconozco el margen real de cada intervención' },
+    ],
+    scoreMap: { si: 3, aprox: 1, no: 0 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // SECTOR: ELECTRICIDAD E INSTALACIONES
+  // ══════════════════════════════════════════════════════════════
+  elec_tipo_trabajo: {
+    id: 'elec_tipo_trabajo', phase: 'electricidad', area: null,
+    question: '¿Cuál es el tipo de trabajo principal de tu empresa?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'instalaciones',    label: '🏗️ Instalaciones eléctricas nuevas (obra, industrial)' },
+      { value: 'mantenimiento',    label: '🔧 Mantenimiento y averías (residencial y terciario)' },
+      { value: 'certificaciones',  label: '📋 Certificaciones, legalizaciones y boletines' },
+      { value: 'mixto',            label: '🔄 Combinamos instalaciones, mantenimiento y boletines' },
+    ],
+    scoreMap: null,
+    next: 'elec_avisos',
+  },
+
+  elec_avisos: {
+    id: 'elec_avisos', phase: 'electricidad', area: 'operaciones',
+    question: '¿Cómo gestionáis los avisos, asignación de técnicos y urgencias?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_software',   label: '✅ Con software o app — aviso → asignación → parte digital' },
+      { value: 'telefono_papel', label: '⚡ Teléfono y papel o cuaderno' },
+      { value: 'whatsapp',       label: '📱 WhatsApp entre el responsable y los operarios' },
+      { value: 'sin_sistema',    label: '❌ Sin sistema — cada técnico gestiona sus trabajos' },
+    ],
+    scoreMap: { app_software: 3, telefono_papel: 1, whatsapp: 0, sin_sistema: 0 },
+    next: 'elec_partes',
+  },
+
+  elec_partes: {
+    id: 'elec_partes', phase: 'electricidad', area: 'operaciones',
+    question: '¿Se genera un parte de trabajo por cada intervención o instalación?',
+    hint: 'Con materiales usados, horas, descripción del trabajo y firma del cliente', type: 'single',
+    options: [
+      { value: 'digital_firma',  label: '✅ Parte digital con firma del cliente desde el móvil' },
+      { value: 'papel',          label: '⚡ Parte en papel que se trae a la oficina' },
+      { value: 'solo_grandes',   label: '🚨 Solo en instalaciones grandes, no en mantenimientos' },
+      { value: 'no',             label: '❌ No, sin parte formal en la mayoría de trabajos' },
+    ],
+    scoreMap: { digital_firma: 3, papel: 1, solo_grandes: 0, no: 0 },
+    next: 'elec_presupuesto',
+  },
+
+  elec_presupuesto: {
+    id: 'elec_presupuesto', phase: 'electricidad', area: 'presupuestacion',
+    question: '¿Cómo hacéis los presupuestos de instalaciones y trabajos?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'software',    label: '✅ Software de presupuestación con materiales y mano de obra' },
+      { value: 'excel',       label: '📄 Excel o plantilla de Word' },
+      { value: 'manual',      label: '📝 A mano o por email sin plantilla fija' },
+      { value: 'de_palabra',  label: '❌ De palabra o precio cerrado sin desglose' },
+    ],
+    scoreMap: { software: 3, excel: 1, manual: 0, de_palabra: 0 },
+    next: 'elec_seguimiento',
+  },
+
+  elec_seguimiento: {
+    id: 'elec_seguimiento', phase: 'electricidad', area: 'ventas_crm',
+    question: '¿Hacéis seguimiento de los presupuestos enviados sin respuesta?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'sistematico',  label: '✅ Sí, con recordatorio o agenda de seguimiento' },
+      { value: 'a_veces',      label: '⚡ A veces, si el trabajo es importante' },
+      { value: 'nunca',        label: '❌ No, si no contestan asumimos que no les interesa' },
+    ],
+    scoreMap: { sistematico: 3, a_veces: 1, nunca: 0 },
+    next: 'elec_stock_materiales',
+  },
+
+  elec_stock_materiales: {
+    id: 'elec_stock_materiales', phase: 'electricidad', area: 'inventario',
+    question: '¿Cómo controlas el stock de material eléctrico (furgoneta y almacén)?',
+    hint: 'Cable, mecanismos, cuadros, protecciones, herramienta...', type: 'single',
+    options: [
+      { value: 'software_sync',  label: '✅ Software — furgoneta y almacén sincronizados' },
+      { value: 'excel',          label: '⚡ Excel o revisión manual' },
+      { value: 'mental',         label: '🚨 Cada técnico lleva lo suyo sin registro central' },
+      { value: 'no',             label: '❌ Sin control — se compra cuando falta' },
+    ],
+    scoreMap: { software_sync: 3, excel: 1, mental: 0, no: 0 },
+    next: 'elec_imputacion',
+  },
+
+  elec_imputacion: {
+    id: 'elec_imputacion', phase: 'electricidad', area: 'operaciones',
+    question: '¿Los materiales de cada instalación o trabajo se imputan a ese proyecto específico?',
+    hint: 'Para conocer el coste real y no perder margen en materiales no facturados', type: 'single',
+    options: [
+      { value: 'siempre',  label: '✅ Sí — cada material queda imputado a su instalación o trabajo' },
+      { value: 'grandes',  label: '⚡ Solo en proyectos grandes' },
+      { value: 'no',       label: '❌ No — los materiales van al coste general sin imputar' },
+    ],
+    scoreMap: { siempre: 3, grandes: 1, no: 0 },
+    next: 'elec_documentacion',
+  },
+
+  elec_documentacion: {
+    id: 'elec_documentacion', phase: 'electricidad', area: 'operaciones',
+    question: '¿Cómo gestionáis boletines eléctricos, certificados y documentación técnica?',
+    hint: 'Boletín de instalación, certificado de inspección, legalización de cuadros...', type: 'single',
+    options: [
+      { value: 'software_doc',  label: '✅ Software o carpeta digital vinculada a cada trabajo' },
+      { value: 'carpetas_pc',   label: '⚡ Carpetas en el PC o Google Drive' },
+      { value: 'papel',         label: '🚨 En papel en la oficina o en la obra' },
+      { value: 'pendiente',     label: '❌ Hay documentación que no se hace o queda pendiente' },
+    ],
+    scoreMap: { software_doc: 3, carpetas_pc: 1, papel: 0, pendiente: 0 },
+    next: 'elec_contratos_mant',
+  },
+
+  elec_contratos_mant: {
+    id: 'elec_contratos_mant', phase: 'electricidad', area: 'ventas_crm',
+    question: '¿Tienes contratos de mantenimiento eléctrico recurrente (empresas, comunidades, industria)?',
+    hint: 'Revisiones periódicas, contratos de mantenimiento de instalaciones...', type: 'single',
+    options: [
+      { value: 'si_cartera',  label: '✅ Sí, cartera activa con renovaciones gestionadas' },
+      { value: 'alguno',      label: '⚡ Alguno, pero sin gestionarlos activamente' },
+      { value: 'no',          label: '❌ No, trabajamos solo bajo demanda' },
+    ],
+    scoreMap: { si_cartera: 3, alguno: 1, no: 0 },
+    next: 'elec_margen',
+  },
+
+  elec_margen: {
+    id: 'elec_margen', phase: 'electricidad', area: 'metricas',
+    question: '¿Conoces el margen real de cada instalación o trabajo (materiales + horas de técnico)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si',    label: '✅ Sí — calculo coste real y margen por trabajo' },
+      { value: 'aprox', label: '⚡ Aproximadamente, pero sin datos exactos' },
+      { value: 'no',    label: '❌ No — desconozco el margen real por instalación' },
+    ],
+    scoreMap: { si: 3, aprox: 1, no: 0 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // SECTOR: AUTOVENTA Y DISTRIBUCIÓN EN RUTA
+  // ══════════════════════════════════════════════════════════════
+  auto_tipo: {
+    id: 'auto_tipo', phase: 'autoventa', area: null,
+    question: '¿Cuál es el modelo de operación principal de tu empresa?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'autoventa_pura',   label: '🚐 Autoventa pura — el vendedor carga, vende y cobra en ruta' },
+      { value: 'preventa_reparto', label: '📋 Preventa + reparto posterior (pedido un día, entrega al siguiente)' },
+      { value: 'reparto_pedidos',  label: '📦 Reparto de pedidos ya tomados (sin venta en ruta)' },
+      { value: 'mixto',            label: '🔄 Combinamos autoventa, preventa y reparto' },
+    ],
+    scoreMap: null,
+    next: 'auto_hoja_ruta',
+  },
+
+  auto_hoja_ruta: {
+    id: 'auto_hoja_ruta', phase: 'autoventa', area: 'operaciones',
+    question: '¿Cómo gestiona el vendedor/repartidor su hoja de ruta diaria?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_optimizada',  label: '✅ App con ruta optimizada, visitas, pedidos e incidencias' },
+      { value: 'app_basica',      label: '⚡ App básica o GPS, sin integración con pedidos' },
+      { value: 'papel',           label: '📝 Listado en papel o WhatsApp del día' },
+      { value: 'criterio_propio', label: '❌ Cada comercial gestiona su ruta a su criterio' },
+    ],
+    scoreMap: { app_optimizada: 3, app_basica: 1, papel: 0, criterio_propio: 0 },
+    next: 'auto_stock_furgoneta',
+  },
+
+  auto_stock_furgoneta: {
+    id: 'auto_stock_furgoneta', phase: 'autoventa', area: 'inventario',
+    question: '¿Cómo controlas el stock de cada furgoneta en tiempo real?',
+    hint: 'Producto cargado al salir, vendido en ruta, devuelto al llegar', type: 'single',
+    options: [
+      { value: 'erp_sync',      label: '✅ ERP/app — stock sincronizado en tiempo real con almacén' },
+      { value: 'cierre_dia',    label: '⚡ Cuadre manual al final de cada jornada' },
+      { value: 'periodico',     label: '🚨 Inventario semanal o cuando hay algún problema' },
+      { value: 'no',            label: '❌ Sin control formal — se carga y lo que sobra vuelve' },
+    ],
+    scoreMap: { erp_sync: 3, cierre_dia: 1, periodico: 0, no: 0 },
+    next: 'auto_pedidos_albaranes',
+  },
+
+  auto_pedidos_albaranes: {
+    id: 'auto_pedidos_albaranes', phase: 'autoventa', area: 'operaciones',
+    question: '¿Cómo se registran los pedidos y albaranes en ruta?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_digital',   label: '✅ App digital — albarán generado y firmado en el momento' },
+      { value: 'papel_trae',    label: '⚡ Talonario en papel que se trae a la oficina para picar' },
+      { value: 'whatsapp_foto', label: '🚨 Foto del talonario o WhatsApp al responsable' },
+      { value: 'no_registro',   label: '❌ Sin albarán — se factura de memoria o por teléfono' },
+    ],
+    scoreMap: { app_digital: 3, papel_trae: 1, whatsapp_foto: 0, no_registro: 0 },
+    next: 'auto_cobros_ruta',
+  },
+
+  auto_cobros_ruta: {
+    id: 'auto_cobros_ruta', phase: 'autoventa', area: 'facturacion',
+    question: '¿Cómo se gestionan los cobros en ruta?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_tpv',       label: '✅ App o datáfono — cobro registrado digitalmente en el momento' },
+      { value: 'efectivo_ctrl', label: '⚡ Efectivo con registro y liquidación diaria controlada' },
+      { value: 'efectivo_sin',  label: '🚨 Efectivo sin liquidación rigurosa al final del día' },
+      { value: 'fiado',         label: '❌ Muchos clientes pagan a posteriori sin control de cobro' },
+    ],
+    scoreMap: { app_tpv: 3, efectivo_ctrl: 1, efectivo_sin: 0, fiado: 0 },
+    next: 'auto_devoluciones',
+  },
+
+  auto_devoluciones: {
+    id: 'auto_devoluciones', phase: 'autoventa', area: 'operaciones',
+    question: '¿Cómo se gestionan las devoluciones de producto en ruta?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'alb_devolucion', label: '✅ Albarán de devolución digital firmado — stock actualizado automáticamente' },
+      { value: 'papel_apunta',   label: '⚡ Se anota en papel y se regulariza después' },
+      { value: 'verbal',         label: '🚨 Verbal — "te lo recojo el próximo día"' },
+      { value: 'sin_control',    label: '❌ Sin control — el producto vuelve sin registro formal' },
+    ],
+    scoreMap: { alb_devolucion: 3, papel_apunta: 1, verbal: 0, sin_control: 0 },
+    next: 'auto_objetivos',
+  },
+
+  auto_objetivos: {
+    id: 'auto_objetivos', phase: 'autoventa', area: 'metricas',
+    question: '¿Cada ruta o vendedor tiene objetivos de venta definidos y seguimiento periódico?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'si_dashboard',  label: '✅ Sí — objetivos definidos, con dashboard de seguimiento en tiempo real' },
+      { value: 'si_reunion',    label: '⚡ Sí — se revisa en reunión semanal o mensual' },
+      { value: 'informales',    label: '🚨 Hay objetivos pero sin seguimiento sistemático' },
+      { value: 'no',            label: '❌ No hay objetivos formales por ruta o vendedor' },
+    ],
+    scoreMap: { si_dashboard: 3, si_reunion: 1, informales: 0, no: 0 },
+    next: 'auto_visibilidad',
+  },
+
+  auto_visibilidad: {
+    id: 'auto_visibilidad', phase: 'autoventa', area: 'metricas',
+    question: '¿El responsable sabe en tiempo real qué está pasando en cada ruta?',
+    hint: 'Ventas del día, visitas realizadas, cobros, incidencias...', type: 'single',
+    options: [
+      { value: 'tiempo_real',   label: '✅ Sí — panel o app con visibilidad en tiempo real' },
+      { value: 'fin_dia',       label: '⚡ Al final del día cuando los vendedores llegan o llaman' },
+      { value: 'reunion',       label: '🚨 Solo en las reuniones semanales o mensuales' },
+      { value: 'no',            label: '❌ No — la ruta es una caja negra hasta que hay un problema' },
+    ],
+    scoreMap: { tiempo_real: 3, fin_dia: 1, reunion: 0, no: 0 },
+    next: 'auto_sincronizacion',
+  },
+
+  auto_sincronizacion: {
+    id: 'auto_sincronizacion', phase: 'autoventa', area: 'inventario',
+    question: '¿Cómo se sincronizan los pedidos y el stock de ruta con el ERP o almacén central?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'automatica',    label: '✅ Integración automática y en tiempo real' },
+      { value: 'fin_jornada',   label: '⚡ Sincronización al final de jornada (volcado de datos)' },
+      { value: 'manual_picar',  label: '🚨 Manual — alguien pica los albaranes de papel cada día' },
+      { value: 'no_erp',        label: '❌ Sin ERP — cada furgoneta opera de forma independiente' },
+    ],
+    scoreMap: { automatica: 3, fin_jornada: 1, manual_picar: 0, no_erp: 0 },
+    next: 'common_empleados',
+  },
+
+  // ══════════════════════════════════════════════════════════════
+  // SECTOR: PANADERÍA, OBRADOR Y PASTELERÍA
+  // ══════════════════════════════════════════════════════════════
+  pana_tipo: {
+    id: 'pana_tipo', phase: 'panaderia', area: null,
+    question: '¿Cuál es el modelo de negocio principal?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'despacho',           label: '🏪 Solo despacho/tienda — compramos a proveedor y vendemos' },
+      { value: 'obrador_despacho',   label: '🍞 Obrador propio + venta en despacho' },
+      { value: 'obrador_reparto',    label: '🚐 Obrador propio + reparto a hostelería, empresas o mercados' },
+      { value: 'obrador_mixto',      label: '🔄 Obrador + despacho + reparto combinado' },
+    ],
+    scoreMap: null,
+    next: 'pana_planificacion_hornadas',
+  },
+
+  pana_planificacion_hornadas: {
+    id: 'pana_planificacion_hornadas', phase: 'panaderia', area: 'operaciones',
+    question: '¿Cómo planificáis la producción y las hornadas?',
+    hint: 'Qué se produce, en qué cantidad y en qué turno', type: 'single',
+    options: [
+      { value: 'software_pedidos',  label: '✅ Software que cruza los pedidos del día con la producción' },
+      { value: 'tabla_papel',       label: '⚡ Tabla o listado en papel revisado a diario' },
+      { value: 'inercia',           label: '🚨 Por inercia — producimos como siempre sin ajustar a la demanda' },
+      { value: 'responsable',       label: '❌ Cada maestro/obrador decide sin registro' },
+    ],
+    scoreMap: { software_pedidos: 3, tabla_papel: 1, inercia: 0, responsable: 0 },
+    next: 'pana_escandallos',
+  },
+
+  pana_escandallos: {
+    id: 'pana_escandallos', phase: 'panaderia', area: 'operaciones',
+    question: '¿Tienes escandallos de coste calculados por producto (pan, bollería, pastelería)?',
+    hint: 'Coste de materia prima + tiempo de elaboración + energía por unidad producida', type: 'single',
+    options: [
+      { value: 'si_completos',  label: '✅ Sí — escandallo completo por producto con coste real' },
+      { value: 'algunos',       label: '⚡ Solo para los productos principales' },
+      { value: 'estimados',     label: '🚨 Coste estimado de cabeza, sin cálculo formal' },
+      { value: 'no',            label: '❌ No — ponemos el precio sin calcular el coste exacto' },
+    ],
+    scoreMap: { si_completos: 3, algunos: 1, estimados: 0, no: 0 },
+    next: 'pana_mermas',
+  },
+
+  pana_mermas: {
+    id: 'pana_mermas', phase: 'panaderia', area: 'inventario',
+    question: '¿Controlas las mermas y el producto sobrante no vendido?',
+    hint: 'Pan que no se vende, bollería devuelta, recortes de pastelería...', type: 'single',
+    options: [
+      { value: 'si_registrado',  label: '✅ Sí — registro diario de mermas con análisis periódico' },
+      { value: 'parcial',        label: '⚡ Parcialmente — apuntamos lo más evidente' },
+      { value: 'no',             label: '❌ No — producimos y lo que sobra se tira sin registrar' },
+    ],
+    scoreMap: { si_registrado: 3, parcial: 1, no: 0 },
+    next: 'pana_pedidos_proveedores',
+  },
+
+  pana_pedidos_proveedores: {
+    id: 'pana_pedidos_proveedores', phase: 'panaderia', area: 'inventario',
+    question: '¿Cómo gestionas los pedidos a proveedores (harinas, mantequilla, materias primas)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'sistema_stock',  label: '✅ Con sistema de stock — pedido automático al bajar del mínimo' },
+      { value: 'revision_ficha', label: '⚡ Revisión periódica con ficha de proveedor' },
+      { value: 'whatsapp_tel',   label: '🚨 Por WhatsApp o teléfono cuando crees que va a faltar' },
+      { value: 'falta',          label: '❌ Pedimos cuando ya falta — con riesgo de rotura' },
+    ],
+    scoreMap: { sistema_stock: 3, revision_ficha: 1, whatsapp_tel: 0, falta: 0 },
+    next: 'pana_pedidos_clientes',
+  },
+
+  pana_pedidos_clientes: {
+    id: 'pana_pedidos_clientes', phase: 'panaderia', area: 'ventas_crm',
+    question: '¿Cómo gestionas los pedidos de clientes fijos (bares, hoteles, restaurantes, empresas)?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_portal',    label: '✅ Portal o app — el cliente pide online y se genera el albarán' },
+      { value: 'whatsapp_hora', label: '⚡ WhatsApp o teléfono antes de cada hornada' },
+      { value: 'fijos',         label: '🚨 Pedido fijo semanal que raramente se actualiza' },
+      { value: 'no_clientes',   label: '— No tenemos clientes de hostelería o empresa' },
+    ],
+    scoreMap: { app_portal: 3, whatsapp_hora: 1, fijos: 0, no_clientes: 2 },
+    next: 'pana_reparto',
+  },
+
+  pana_reparto: {
+    id: 'pana_reparto', phase: 'panaderia', area: 'operaciones',
+    question: '¿Cómo gestionas el reparto a clientes?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'app_ruta',      label: '✅ App con ruta optimizada, albaranes digitales y firma' },
+      { value: 'papel_ruta',    label: '⚡ Hoja de ruta y albaranes en papel' },
+      { value: 'sin_control',   label: '🚨 Cada repartidor gestiona su ruta sin registro formal' },
+      { value: 'no_reparto',    label: '— No realizamos reparto' },
+    ],
+    scoreMap: { app_ruta: 3, papel_ruta: 1, sin_control: 0, no_reparto: 2 },
+    next: 'pana_trazabilidad_alergenos',
+  },
+
+  pana_trazabilidad_alergenos: {
+    id: 'pana_trazabilidad_alergenos', phase: 'panaderia', area: 'operaciones',
+    question: '¿Cómo gestionas la información sobre alérgenos y trazabilidad de materias primas?',
+    hint: 'Obligatorio por normativa — etiquetado, fichas de producto, registros de lote', type: 'single',
+    options: [
+      { value: 'software_trazo', label: '✅ Software con trazabilidad de lote y fichas de alérgenos actualizadas' },
+      { value: 'fichas_papel',   label: '⚡ Fichas en papel o Excel actualizadas periódicamente' },
+      { value: 'parcial',        label: '🚨 Se hace lo mínimo pero sin sistema formal' },
+      { value: 'no',             label: '❌ Sin control — podría haber problemas con una inspección' },
+    ],
+    scoreMap: { software_trazo: 3, fichas_papel: 1, parcial: 0, no: 0 },
+    next: 'pana_margen',
+  },
+
+  pana_margen: {
+    id: 'pana_margen', phase: 'panaderia', area: 'metricas',
+    question: '¿Sabes cuál es el margen real de tu despacho y tu producción?',
+    hint: 'Ventas totales menos coste de materias primas, energía, personal y mermas', type: 'single',
+    options: [
+      { value: 'si',     label: '✅ Sí — conozco el margen por canal y por familia de producto' },
+      { value: 'global', label: '⚡ Solo el margen global del negocio, sin desglose' },
+      { value: 'no',     label: '❌ No — no calculo el margen real con todos los costes' },
+    ],
+    scoreMap: { si: 3, global: 1, no: 0 },
     next: 'common_empleados',
   },
 
