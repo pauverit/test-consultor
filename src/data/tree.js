@@ -2235,6 +2235,47 @@ export const NODES = {
       { value: 'no',        label: 'No lo medimos — no sabemos qué cuesta captar un cliente' },
     ],
     scoreMap: { si_exacto: 3, aprox: 1, no: 0 },
+    next: 'common_marketing_roi',
+  },
+
+  common_marketing_roi: {
+    id: 'common_marketing_roi', phase: 'metricas', area: 'metricas',
+    question: '¿Medís el Retorno de Inversión (ROI) de vuestras acciones de marketing y publicidad?',
+    hint: 'Saber exactamente cuántos euros de venta genera cada euro invertido en captación', type: 'single',
+    options: [
+      { value: 'si_medido',  label: '✅ Sí, sabemos el ROI de cada canal o campaña' },
+      { value: 'aprox',      label: '⚡ Lo intuimos, pero no lo medimos de forma exacta' },
+      { value: 'no',         label: '❌ No — invertimos pero es difícil saber qué funciona' },
+      { value: 'no_invierte',label: '— No invertimos en marketing actualmente' },
+    ],
+    scoreMap: { si_medido: 3, aprox: 1, no: 0, no_invierte: 1 },
+    next: 'common_finanzas_caja',
+  },
+
+  common_finanzas_caja: {
+    id: 'common_finanzas_caja', phase: 'datos_empresa', area: 'facturacion',
+    question: '¿Conoces el punto de equilibrio mensual de la empresa y cuántos meses podríais subsistir con la caja actual sin facturar?',
+    hint: 'Punto de equilibrio (Break-even): facturación mínima mensual para no perder dinero', type: 'single',
+    options: [
+      { value: 'si_exacto',  label: '✅ Sí, revisamos la planificación financiera regularmente' },
+      { value: 'aprox',      label: '⚡ Sabemos los gastos fijos a grosso modo' },
+      { value: 'no_caja',    label: '🚨 No — gestionamos la liquidez al día' },
+    ],
+    scoreMap: { si_exacto: 3, aprox: 1, no_caja: 0 },
+    next: 'common_talento_rotacion',
+  },
+
+  common_talento_rotacion: {
+    id: 'common_talento_rotacion', phase: 'equipo', area: 'equipo',
+    question: '¿Tenéis dificultades para encontrar, contratar o retener talento clave en el equipo?',
+    hint: null, type: 'single',
+    options: [
+      { value: 'alta_rotacion', label: '🚨 Sí, hay mucha rotación o es difícil encontrar buenos perfiles' },
+      { value: 'algunos',       label: '⚡ A veces cuesta retener perfiles técnicos o clave' },
+      { value: 'estable',       label: '✅ No, el equipo es estable y fidelizado' },
+      { value: 'solo',          label: '— Solo trabajo yo / no tengo personal' },
+    ],
+    scoreMap: { alta_rotacion: 0, algunos: 1, estable: 3, solo: 3 },
     next: null, // ← FIN → Mostrar resultados
   },
 }

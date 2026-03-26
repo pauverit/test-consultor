@@ -88,6 +88,13 @@ export function exportPDF(report, companyName = '') {
   doc.setTextColor(...GRAY)
   doc.text(`Se han detectado ${report.leaks.length} areas de mejora y ${report.modules.length} modulos recomendados`, 80, y + 23)
 
+  if (report.totalMinLoss > 0) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(11)
+    doc.setTextColor(220, 38, 38)
+    doc.text(`Costo oculto estimado: ${report.totalMinLoss.toLocaleString('es-ES')}E - ${report.totalMaxLoss.toLocaleString('es-ES')}E anuales`, 80, y + 30)
+  }
+
   y += 45
 
   // ── PUNTUACIONES POR ÁREA ────────────────────────────────────────────────
@@ -226,10 +233,30 @@ export function exportPDF(report, companyName = '') {
   // ── PRÓXIMOS PASOS ────────────────────────────────────────────────────────
   if (y > H - 80) { doc.addPage(); y = 20 }
 
+  if (report.quickWins && report.quickWins.length > 0) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(14)
+    doc.setTextColor(...DARK)
+    doc.text('Plan de Accion Inmediato (Quick Wins)', 15, y)
+    y += 10
+
+    report.quickWins.forEach(win => {
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(...DARK)
+      const lines = doc.splitTextToSize(`- ${t(win)}`, W - 30)
+      doc.text(lines, 15, y)
+      y += lines.length * 6 + 2
+    })
+    y += 10
+  }
+
+  if (y > H - 40) { doc.addPage(); y = 20 }
+
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(14)
   doc.setTextColor(...DARK)
-  doc.text('Proximos Pasos Recomendados', 15, y)
+  doc.text('Siguientes Pasos de Transformacion', 15, y)
   y += 10
 
   const steps = [

@@ -2,14 +2,14 @@ import { NODES } from '../data/tree.js'
 import { getRecommendedModules } from '../data/modules.js'
 
 export const AREAS = [
-  { id: 'ventas_crm',      label: 'Ventas y Clientes',    icon: '🤝' },
-  { id: 'presupuestacion', label: 'Presupuestación',      icon: '📄' },
-  { id: 'operaciones',     label: 'Operaciones',          icon: '⚙️' },
-  { id: 'inventario',      label: 'Inventario y Compras', icon: '📦' },
-  { id: 'equipo',          label: 'Equipo y Procesos',    icon: '👥' },
-  { id: 'facturacion',     label: 'Facturación y Cobros', icon: '💶' },
-  { id: 'tiempo',          label: 'Gestión del Tiempo',   icon: '⏱️' },
-  { id: 'metricas',        label: 'Datos y Métricas',     icon: '📊' },
+  { id: 'ventas_crm', label: 'Ventas y Clientes', icon: '🤝' },
+  { id: 'presupuestacion', label: 'Presupuestación', icon: '📄' },
+  { id: 'operaciones', label: 'Operaciones', icon: '⚙️' },
+  { id: 'inventario', label: 'Inventario y Compras', icon: '📦' },
+  { id: 'equipo', label: 'Equipo y Procesos', icon: '👥' },
+  { id: 'facturacion', label: 'Facturación y Cobros', icon: '💶' },
+  { id: 'tiempo', label: 'Gestión del Tiempo', icon: '⏱️' },
+  { id: 'metricas', label: 'Datos y Métricas', icon: '📊' },
 ]
 
 const LEAK_RULES = [
@@ -724,7 +724,56 @@ const LEAK_RULES = [
     euros: 'Riesgo: errores en facturas, problemas con Hacienda y tiempo perdido en cierres contables',
     trigger: (ans) => ans.common_facturacion_como === 'excel',
   },
+  {
+    id: 'marketing_sin_roi',
+    title: 'Inversión en marketing sin medir el ROI',
+    description: 'Vender a través de marketing sin medir el Retorno de Inversión significa que estás gastando a ciegas. Podrías estar perdiendo dinero en ciertos canales sin saberlo.',
+    impact: 'alto', area: 'metricas',
+    euros: 'Pérdida oculta: inversión en campañas o canales que no generan clientes rentables',
+    trigger: (ans) => ans.common_marketing_roi === 'no' || ans.common_marketing_roi === 'aprox',
+  },
+  {
+    id: 'riesgo_caja',
+    title: 'Desconocimiento del break-even y riesgo de liquidez',
+    description: 'No saber qué facturación mínima necesitas para cubrir costes y cuánto runway (caja) tienes es el mayor riesgo. La mayoría de empresas cierran por falta de caja, no por falta de ventas.',
+    impact: 'critico', area: 'facturacion',
+    euros: 'Riesgo inminente: tensión de tesorería y posibles bloqueos de pagos',
+    trigger: (ans) => ans.common_finanzas_caja === 'no_caja' || ans.common_finanzas_caja === 'aprox',
+  },
+  {
+    id: 'fuga_talento',
+    title: 'Rotación o falta de fidelización del talento clave',
+    description: 'Reemplazar a una pieza clave del equipo cuesta de media entre el 50% y el 200% de su salario anual en tiempos de contratación, onboarding y curva de aprendizaje.',
+    impact: 'alto', area: 'equipo',
+    euros: 'Coste estimado: miles de euros ocultos en productividad perdida por cada baja y nueva contratación',
+    trigger: (ans) => ans.common_talento_rotacion === 'alta_rotacion' || ans.common_talento_rotacion === 'algunos',
+  },
 ]
+
+export function getLossAndWins(leak) {
+  let min = 1000, max = 3000, wins = []
+  if (leak.impact === 'critico') { min = 5000; max = 15000; }
+  if (leak.impact === 'alto') { min = 2000; max = 8000; }
+
+  // Quick Wins genéricos por área
+  if (leak.area === 'ventas_crm') wins.push(`Comercial: Llama hoy mismo a 3 presupuestos de alto valor enviados la semana pasada.`)
+  if (leak.area === 'facturacion') wins.push(`Cobros: Envía un recordatorio de impago por WhatsApp a los 3 mayores deudores.`)
+  if (leak.area === 'operaciones') wins.push(`Operaciones: Reúnete 15 min con tu equipo y documenten el proceso de mayor fricción.`)
+  if (leak.area === 'inventario') wins.push(`Stock: Haz un inventario rápido hoy de los 5 productos más críticos de tu almacén.`)
+  if (leak.area === 'tiempo') wins.push(`Tiempo: Bloquea 2 horas en tu agenda mañana por la mañana para trabajo estratégico sin interrupciones.`)
+  if (leak.area === 'equipo') wins.push(`Equipo: Delega una decisión repetitiva de bajo riesgo documentando el protocolo hoy mismo.`)
+  if (leak.area === 'metricas') wins.push(`Métricas: Calcula hoy tu coste real de adquisición de cliente (CAC) del mes pasado.`)
+
+  // Quick Wins específicos
+  if (leak.id === 'sin_seguimiento') wins = ['Anota en un excel los 10 últimos presupuestos recibidos y llama a 5 de ellos hoy.']
+  if (leak.id === 'impagos_sin_gestionar') wins = ['Crea un mensaje tipo y enviáselo a los 3 mayores deudores hoy mismo.']
+  if (leak.id === 'facturas_olvidadas') wins = ['Revisa tu agenda u obras de hace 2 semanas para asegurar que todos los trabajos se facturaron.']
+  if (leak.id === 'interrupciones_continuas') wins = ['Silencia las notificaciones de WhatsApp del móvil durante las próximas 2 horas.']
+  if (leak.id === 'riesgo_caja') wins = ['Suma todos tus costes fijos de este mes para saber tu ingreso mínimo necesario (Break-even).']
+  if (leak.id === 'fuga_talento') wins = ['Pregunta hoy individualmente a 2 miembros de tu equipo: "¿Qué te frustra más de tu rutina diaria de trabajo?".']
+
+  return { minLoss: min, maxLoss: max, quickWins: wins }
+}
 
 function calcAreaScores(answers) {
   const areaData = {}
@@ -752,33 +801,50 @@ function calcGlobalScore(areaScores) {
 }
 
 export function generateReport(answers) {
-  const areaScores  = calcAreaScores(answers)
+  const areaScores = calcAreaScores(answers)
   const globalScore = calcGlobalScore(areaScores)
 
   const leaks = LEAK_RULES
     .filter(r => r.trigger(answers))
     .sort((a, b) => ({ critico: 0, alto: 1, medio: 2 }[a.impact] - { critico: 0, alto: 1, medio: 2 }[b.impact]))
+    .map(leak => ({ ...leak, ...getLossAndWins(leak) }))
+
+  let totalMinLoss = 0;
+  let totalMaxLoss = 0;
+  let allQuickWins = [];
+
+  leaks.forEach(l => {
+    totalMinLoss += l.minLoss || 0;
+    totalMaxLoss += l.maxLoss || 0;
+    if (l.quickWins) allQuickWins.push(...l.quickWins);
+  });
+
+  // Unique quick wins limited to top 3
+  allQuickWins = [...new Set(allQuickWins)].slice(0, 3);
 
   const modules = getRecommendedModules(answers)
-  const areas   = AREAS.map(a => ({ ...a, score: areaScores[a.id] })).filter(a => a.score !== null && a.score !== undefined)
+  const areas = AREAS.map(a => ({ ...a, score: areaScores[a.id] })).filter(a => a.score !== null && a.score !== undefined)
 
   return {
     globalScore, areas, leaks, modules, answers,
+    totalMinLoss,
+    totalMaxLoss,
+    quickWins: allQuickWins,
     sector: answers.sector,
     generatedAt: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' }),
   }
 }
 
 export function getScoreLabel(score) {
-  if (score >= 75) return { label: 'Bueno',     color: 'text-emerald-600', bg: 'bg-emerald-100', bar: 'bg-emerald-500' }
-  if (score >= 50) return { label: 'Mejorable', color: 'text-amber-600',   bg: 'bg-amber-100',   bar: 'bg-amber-500' }
-  if (score >= 25) return { label: 'Problema',  color: 'text-orange-600',  bg: 'bg-orange-100',  bar: 'bg-orange-500' }
-  return                  { label: 'Crítico',   color: 'text-red-600',     bg: 'bg-red-100',     bar: 'bg-red-500' }
+  if (score >= 75) return { label: 'Bueno', color: 'text-emerald-600', bg: 'bg-emerald-100', bar: 'bg-emerald-500' }
+  if (score >= 50) return { label: 'Mejorable', color: 'text-amber-600', bg: 'bg-amber-100', bar: 'bg-amber-500' }
+  if (score >= 25) return { label: 'Problema', color: 'text-orange-600', bg: 'bg-orange-100', bar: 'bg-orange-500' }
+  return { label: 'Crítico', color: 'text-red-600', bg: 'bg-red-100', bar: 'bg-red-500' }
 }
 
 export function getGlobalLabel(score) {
-  if (score >= 75) return { label: 'Negocio bien gestionado',         emoji: '✅', color: 'text-emerald-600' }
-  if (score >= 50) return { label: 'Con margen de mejora claro',      emoji: '⚡', color: 'text-amber-600' }
-  if (score >= 25) return { label: 'Fugas importantes detectadas',    emoji: '⚠️', color: 'text-orange-600' }
-  return                  { label: 'Situación crítica — actúa ahora', emoji: '🚨', color: 'text-red-600' }
+  if (score >= 75) return { label: 'Negocio bien gestionado', emoji: '✅', color: 'text-emerald-600' }
+  if (score >= 50) return { label: 'Con margen de mejora claro', emoji: '⚡', color: 'text-amber-600' }
+  if (score >= 25) return { label: 'Fugas importantes detectadas', emoji: '⚠️', color: 'text-orange-600' }
+  return { label: 'Situación crítica — actúa ahora', emoji: '🚨', color: 'text-red-600' }
 }

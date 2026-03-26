@@ -6,20 +6,20 @@ import ModuleCards from './ModuleCards.jsx'
 import { exportPDF } from '../../utils/pdfExport.js'
 
 const SECTOR_LABELS = {
-  reformas:   'construcción y reformas',
-  comercio:   'comercio y distribución',
+  reformas: 'construcción y reformas',
+  comercio: 'comercio y distribución',
   tecnologia: 'tecnología y soporte técnico',
   hosteleria: 'hostelería y restauración',
-  servicios:  'servicios profesionales',
-  industria:  'industria y fabricación',
+  servicios: 'servicios profesionales',
+  industria: 'industria y fabricación',
 }
 
 const EMPLEADOS_LABELS = {
-  solo:  'solo tú',
-  '2a5':   '2 a 5 personas',
-  '6a15':  '6 a 15 personas',
+  solo: 'solo tú',
+  '2a5': '2 a 5 personas',
+  '6a15': '6 a 15 personas',
   '16a50': '16 a 50 personas',
-  mas50:   'más de 50 personas',
+  mas50: 'más de 50 personas',
 }
 
 const FACTURACION_LABELS = {
@@ -58,9 +58,9 @@ function getPersonalizedIntro(report) {
 }
 
 const TABS = [
-  { id: 'resumen',  label: '📊 Resumen',     desc: 'Puntuación global' },
-  { id: 'fugas',    label: '🚨 Fugas',        desc: 'Problemas detectados' },
-  { id: 'modulos',  label: '🛠️ Soluciones',   desc: 'Software recomendado' },
+  { id: 'resumen', label: '📊 Resumen', desc: 'Puntuación global' },
+  { id: 'fugas', label: '🚨 Fugas', desc: 'Problemas detectados' },
+  { id: 'modulos', label: '🛠️ Soluciones', desc: 'Software recomendado' },
 ]
 
 export default function ResultsScreen({ report, onRestart }) {
@@ -105,11 +105,10 @@ export default function ResultsScreen({ report, onRestart }) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 text-sm font-semibold py-2 px-3 rounded-lg transition-all duration-150 ${
-                  activeTab === tab.id
+                className={`flex-1 text-sm font-semibold py-2 px-3 rounded-lg transition-all duration-150 ${activeTab === tab.id
                     ? 'bg-white text-slate-900 shadow-sm'
                     : 'text-slate-500 hover:text-slate-700'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -139,7 +138,7 @@ export default function ResultsScreen({ report, onRestart }) {
               <ScoreSection globalScore={report.globalScore} areas={report.areas} />
 
               {/* Resumen rápido */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-6">
                 <div className="card text-center">
                   <div className="text-3xl font-bold text-red-500 mb-1">{report.leaks.length}</div>
                   <div className="text-slate-500 text-sm">Fugas detectadas</div>
@@ -149,6 +148,35 @@ export default function ResultsScreen({ report, onRestart }) {
                   <div className="text-slate-500 text-sm">Módulos recomendados</div>
                 </div>
               </div>
+
+              {/* Coste de ineficiencia */}
+              {(report.totalMinLoss > 0) && (
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-5 text-center mb-6">
+                  <h3 className="text-red-800 font-bold mb-1">Costo Estimado de Ineficiencias</h3>
+                  <p className="text-red-600 text-sm mb-2">Según promedios del sector, estas fugas te están costando al año aprox:</p>
+                  <div className="text-3xl font-black text-red-600">
+                    {report.totalMinLoss.toLocaleString('es-ES')}€ - {report.totalMaxLoss.toLocaleString('es-ES')}€
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Wins */}
+              {report.quickWins && report.quickWins.length > 0 && (
+                <div className="card bg-emerald-50 border border-emerald-100 mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">⚡</span>
+                    <h3 className="font-bold text-emerald-800 text-lg">Plan de Acción Inmediato (Quick Wins)</h3>
+                  </div>
+                  <ul className="space-y-3 mt-2">
+                    {report.quickWins.map((win, idx) => (
+                      <li key={idx} className="flex items-start gap-3 text-sm text-emerald-700 leading-relaxed">
+                        <span className="mt-0.5 text-emerald-500">▶</span>
+                        <span>{win}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* CTA exportar */}
               <div className="card bg-gradient-to-br from-slate-800 to-slate-900 border-0 text-white">
