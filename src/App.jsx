@@ -8,23 +8,23 @@ import QuestionCard from './components/QuestionCard.jsx'
 import ProgressBar from './components/ProgressBar.jsx'
 import ResultsScreen from './components/results/ResultsScreen.jsx'
 
-const ESTIMATED_TOTAL = 28
+const ESTIMATED_TOTAL = 30
 
 export default function App() {
-  const [screen, setScreen]             = useState('welcome')
-  const [path, setPath]                 = useState([START_NODE])
-  const [answers, setAnswers]           = useState({})
+  const [screen, setScreen] = useState('welcome')
+  const [path, setPath] = useState([START_NODE])
+  const [answers, setAnswers] = useState({})
   const [pendingPhase, setPendingPhase] = useState(null)
-  const [direction, setDirection]       = useState(1)
-  const [report, setReport]             = useState(null)
+  const [direction, setDirection] = useState(1)
+  const [report, setReport] = useState(null)
 
   // Ref siempre actualizado de answers
   const answersRef = useRef({})
 
   const currentNodeId = path[path.length - 1]
-  const currentNode   = NODES[currentNodeId]
+  const currentNode = NODES[currentNodeId]
   const currentAnswer = answers[currentNodeId]
-  const progress      = Math.min(Math.round((path.length / ESTIMATED_TOTAL) * 100), 95)
+  const progress = Math.min(Math.round((path.length / ESTIMATED_TOTAL) * 100), 95)
 
   // ─── NAVEGACIÓN ───────────────────────────────────────────────────────────
   function goToNext(node, value) {
@@ -37,8 +37,8 @@ export default function App() {
       return
     }
 
-    const nextNode    = NODES[nextId]
-    const nextPhase   = nextNode?.phase
+    const nextNode = NODES[nextId]
+    const nextPhase = nextNode?.phase
 
     if (nextPhase && nextPhase !== node.phase && PHASES[nextPhase]?.showIntro) {
       setPendingPhase(nextPhase)

@@ -1,13 +1,13 @@
 import { PHASES } from '../data/tree.js'
 
 // Orden de fases para la barra de progreso (excluyendo perfil que no tiene intro)
-const PHASE_ORDER = ['reformas','comercio','tecnologia','hosteleria','servicios','industria','datos_empresa','facturacion','tiempo','metricas']
+const PHASE_ORDER = ['reformas', 'comercio', 'tecnologia', 'hosteleria', 'servicios', 'industria', 'datos_empresa', 'facturacion', 'tiempo', 'metricas']
 
 export default function ProgressBar({ currentPhase, progress, questionNum, estimatedTotal }) {
   const phase = PHASES[currentPhase]
 
   // Para los segmentos: solo mostramos las 4 fases comunes finales siempre visibles
-  const commonPhases = ['facturacion','tiempo','metricas']
+  const commonPhases = ['facturacion', 'tiempo', 'metricas']
   const phaseIdx = commonPhases.indexOf(currentPhase)
 
   return (
@@ -23,7 +23,7 @@ export default function ProgressBar({ currentPhase, progress, questionNum, estim
             )}
           </div>
           <span className="text-sm text-slate-400 font-medium">
-            Pregunta {questionNum} · ~{Math.max(0, estimatedTotal - questionNum)} restantes
+            Pregunta {questionNum} · {progress}% completado
           </span>
         </div>
         {/* Barra general */}
