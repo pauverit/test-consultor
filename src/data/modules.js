@@ -463,8 +463,117 @@ export const SAAS_MODULES = [
   },
 ]
 
+export function getImplementationGuide(moduleId, moduleName) {
+  const guides = {
+    crm: {
+      timeToImplement: '2 a 4 Semanas', difficulty: 'Media (Requiere cambio de hábitos)',
+      features: ['Embudo de ventas visual (Kanban)', 'Sincronización automatizada de correos', 'Automatización de alertas de seguimiento a comerciales', 'Dashboard global de ratios de conversión'],
+      steps: [
+        'Fase 1 - Diseño del Pipeline: Plasmar y trazar teóricamente las fases exactas de venta (Lead, Cita, Visita técnica, Oferta, Cierre).',
+        'Fase 2 - Migración y Setup: Saneamiento de la BBDD actual en Excel, volcado al nuevo software y jerarquía de permisos por comercial.',
+        'Fase 3 - Reglas de Negocio Automatizadas: Programar crono-avisos y seguimientos por falta de feedback tras "X" días.',
+        'Fase 4 - Despliegue de Rutinas: Prohibición de uso del sistema manual antiguo. Asignación total de leads vía la nueva app.',
+      ]
+    },
+    presupuestador: {
+      timeToImplement: '3 a 5 Semanas', difficulty: 'Alta (Homogeneiza las tarifas de la empresa)',
+      features: ['Calculadora multi-capa parametrizable (Mano de obra, Costo Base, Márgenes)', 'Catálogo en base de datos unificada', 'Generación ágil de ofertas en plantilla PDF nativa con firma digital', 'Histórico de control de versiones de presupuestos'],
+      steps: [
+        'Fase 1 - Auditoría de Tarifas: Analítica y volcado de precios directos de proveedores.',
+        'Fase 2 - Ingeniería de Formulas y Escandallos: Volcar los escandallos al motor automatizado para blindar el margen de contribución de cada línea de producto.',
+        'Fase 3 - UI/UX Reporte: Códificación de la plantilla que verá el cliente corporativo (Logo, estética, legales, términos).',
+        'Fase 4 - Flujo y Testing Integrado: Validar conversión presupuesto -> pedido/obra. Generar y contrastar contra históricos.',
+      ]
+    },
+    gestion_obras: {
+      timeToImplement: '4 a 6 Semanas', difficulty: 'Alta (Afecta directamente el entorno móvil de la jornada de instalación)',
+      features: ['Imputación de partes de trabajo nativo-móvil para la plantilla técnica', 'Comparativa global (Presupuestado horas vs Ejecutado real)', 'Alertas tempranas de riesgo de sobrecoste antes del cierre', 'Gestión de certificaciones vinculada al avance'],
+      steps: [
+        'Fase 1 - Estructura WBS de Proyecto: Dividir funcionalmente tipos de obras, certificaciones capitulares, etc.',
+        'Fase 2 - Pantalla Móvil de Terreno: Diseño UX para que los operarios registren horas o dietas sin ir a oficina.',
+        'Fase 3 - Conciliación Analítica: Matchear ingresos de obra y gastos con proveedores en la macro del proyecto.',
+        'Fase 4 - Formación a Jefatura de Obra: Enseñanza en lectura del dashboard direccional (Rentabilidad y desviaciones).',
+      ]
+    },
+    inventario: {
+      timeToImplement: '3 a 6 Semanas', difficulty: 'Media/Alta',
+      features: ['Gestión multi-ubicación real', 'Cálculos y notificaciones por Punto de Pedido / Stock de Seguridad', 'Agilidad con lectura de SKU por formatos de Códigos de Barras / QR', 'Valorización contable FIFO/LIFO integrada'],
+      steps: [
+        'Fase 1 - Modelado del Catálogo: Establecer el catálogo maestro y KPIs de inventario mínimo y máximo por producto.',
+        'Fase 2 - Regularización o Inventario "0": Ejecución en equipo físico en fábrica para arrancar un conteo inicial perfecto.',
+        'Fase 3 - Procesos Tácticos Inbound: Entradas logísticas — recepciones y cotejo contra pedidos de compra a través de tablets PDA.',
+        'Fase 4 - Procesos Tácticos Outbound: Expediciones — descuentos por asignación de salidas, facturas o cesiones inter-almacén.',
+      ]
+    },
+    facturacion_auto: {
+      timeToImplement: '1 a 3 Semanas', difficulty: 'Baja (Alta ganancia administrativa)',
+      features: ['Facturación recurrente o programada masiva partiendo del cierre comercial', 'Gestión fiscal de automatización de series contables', 'Integración y adaptaciones compliance local (TicketBAI, Face o estándar)', 'Envío al cliente automático y trazabilidad de lecturas'],
+      steps: [
+        'Fase 1 - Parametrización Contable ERP: Establecimiento de series, vencimientos, cuentas mayores, IVA/IGIC/IRPF correspondientes.',
+        'Fase 2 - Motores de Disparo: Conectar la logística (Albarán Completado) o los Proyectos (Obra Cerrada) para que salte y genere factura transparente.',
+        'Fase 3 - Plantillas PDF Oficiales: Diseño formal, logos e IBAN de cobro según la entidad del cliente destinatario.',
+        'Fase 4 - Go-Live: Fase de facturas simuladas y testeo vía Enlace Contable para confirmar cierre del proceso administrativo.',
+      ]
+    },
+    cobros: {
+      timeToImplement: '1 a 2 Semanas', difficulty: 'Baja (Retorno de Inversión (ROI) Inmediato)',
+      features: ['Dashboard piramidal de alerta de riesgo por envejecimiento de la deuda', 'Comunicaciones omnicanal nativas para gestión de impagados o recordatorios', 'Gestor documental para integrar cobros fraccionados o pasarelas online de liquidación', 'Modelado automático de proyecciones a corto de ingresos'],
+      steps: [
+        'Fase 1 - Traspaso Cartera Viva: Incorporar libro contable o listado de facturas actualmente pendientes en la calle y clasificarlas.',
+        'Fase 2 - Reglas Temporales: Establecer alertas cronológicas (E.g. cortesía post-vencimiento en Día 1, tensión extrema administrativa en Día 45).',
+        'Fase 3 - Motor Operativo: Levantar canalizador automático de mensajes y plantillas (WhatsApp, SMS, Email con copia CCO administrativa).',
+        'Fase 4 - Conciliaciones Bancarias: Sincronizar norma XML del banco para cruces automáticos de lo pagado. Reducir errores diarios.',
+      ]
+    },
+    dashboard: {
+      timeToImplement: '2 a 4 Semanas', difficulty: 'Media (Normalización de los orígenes de datos locales/heredados)',
+      features: ['Control Room en la nube sobre ventas, cash y rentabilidad analítica', 'Actualizado sin recargos, instantáneo o en ventanas horarias preconfiguradas', 'Accesibilidad 100% Mobile y envíos automatizados PDF a inversores o CEO', 'Capacidad Cross-Join: cruce logístico frente a comercial nativo'],
+      steps: [
+        'Fase 1 - Mapping de las Preguntas Estratégicas: Consultoría directiva definiendo métricas estrellas OMTD (One Metric That Matters).',
+        'Fase 2 - Data Lake Connections: Desarrollo técnico y API de canalización desde silos externos (SAGE, Google Analytics, Excel interno...).',
+        'Fase 3 - Cubos Analíticos y BI: Modelación estructural de PowerBI o Metabase y programación de representaciones visuales claras.',
+        'Fase 4 - Testing & Calibration: Limpieza algorítmica y gestión de anomalías informativas y adopción por comité de la gerencia.',
+      ]
+    }
+  }
+
+  if (guides[moduleId]) return guides[moduleId]
+
+  // Fallback Genérico Operacional (trazabilidad, reservas, portales B2B, mantenimiento, etc.)
+  let time = '3 a 6 Semanas'
+  let diff = 'Media / Alta'
+  let features = [
+    `Digitalización operativa total vinculada a los procesos de ${moduleName.toLowerCase()}`,
+    'Arquitectura en la nube y sincronización interdepartamental completa asíncrona',
+    'Cuadro de mando analítico general orientado a trazabilidad operacional inmediata',
+    'Formatos escalables con API propia para escalar o integrarse con legados del ecosistema vigente'
+  ]
+  let steps = [
+    `Fase 1 - Relevamiento Táctico y Toma de Requerimientos: Consultoría de alto perfil mapeando y documentando cómo rinde la gestión manual (Papel, Email o Excel) de ${moduleName.toLowerCase()}.`,
+    `Fase 2 - Software Architecture: Creación técnica de un Modelo de Datos Relacional y UX adaptada a los flujos únicos que exige la idiosincrasia de la empresa operativa en este frente.`,
+    `Fase 3 - Setup (Minimum Viable Framework): Despliegue en staging o servidores seguros del software a la medida final de la organización corporativa y configuración granular de usuarios base por su rol local y responsabilidades de manipulación.`,
+    `Fase 4 - Shadow Testing Parallelo: Equipos de élite designados utilizarán esta suite nueva junto a los canales manuales por 7 días como red de seguridad (Beta Feedback). Captura de incidencias o casos de borde (edge cases) del estrés real operativo de campo.`,
+    `Fase 5 - Integración y Extremos Go-Live: Apagón radical de herramientas previas paralizantes con asistencia técnica local in-house directa al núcleo resolutivo.`,
+  ]
+
+  if (moduleId.includes('tpv') || moduleId.includes('autoventa') || moduleId.includes('taller')) { time = '4 a 6 Semanas'; diff = 'Alta (Operación en primera línea crítica sin margen de error temporal)'; }
+  if (moduleId.includes('mantenimiento') || moduleId.includes('portal') || moduleId.includes('nesting')) { time = '4 a 8 Semanas'; diff = 'Media (Requiere validaciones o testeos industriales profundos)'; }
+
+  return { timeToImplement: time, difficulty: diff, features, steps }
+}
+
 export function getRecommendedModules(answers) {
   return SAAS_MODULES
     .filter(m => m.trigger(answers))
-    .map((m, i) => ({ ...m, priority: i + 1 }))
+    .map((m, i) => {
+      const guide = getImplementationGuide(m.id, m.name)
+      return {
+        ...m,
+        priority: i + 1,
+        features: guide.features,
+        steps: guide.steps,
+        timeToImplement: guide.timeToImplement,
+        difficulty: guide.difficulty
+      }
+    })
 }

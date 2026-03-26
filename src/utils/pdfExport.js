@@ -2,15 +2,24 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { getScoreLabel, getGlobalLabel } from './diagnose.js'
 
-// jsPDF (Helvetica) no soporta emojis — los eliminamos antes de escribir
 function t(str) {
-  if (!str) return ''
+  if (!str) return '';
   return str
-    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')  // emojis amplio rango
-    .replace(/[\u2600-\u27BF]/gu, '')          // símbolos misceláneos
-    .replace(/[\uFE00-\uFE0F]/gu, '')          // variation selectors
+    .replace(/✅/g, '')
+    .replace(/❌/g, '')
+    .replace(/⚡/g, '')
+    .replace(/🚨/g, '')
+    .replace(/▶/g, '-')
+    .replace(/—/g, '-')
+    .replace(/–/g, '-')
+    .replace(/€/g, 'EUR')
+    .replace(/['"']/g, "'")
+    .replace(/[\u{10000}-\u{10FFFF}]/gu, '')
+    .replace(/[\u2600-\u27BF]/gu, '')
+    .replace(/[\uFE00-\uFE0F]/gu, '')
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, '') // Mantiene acentos y eñes (WinAnsi)
     .replace(/\s{2,}/g, ' ')
-    .trim()
+    .trim();
 }
 
 const BRAND_BLUE = [37, 99, 235]
@@ -196,38 +205,87 @@ export function exportPDF(report, companyName = '') {
     })
   }
 
-  // ── MÓDULOS SAAS ─────────────────────────────────────────────────────────
-  if (y > H - 60) { doc.addPage(); y = 20 }
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(14)
-  doc.setTextColor(...DARK)
-  doc.text('Modulos SaaS Recomendados', 15, y)
-
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(10)
-  doc.setTextColor(...GRAY)
-  doc.text('Ordenados por impacto prioritario para tu negocio', 15, y + 7)
-  y += 18
-
+  // ── MÓDULOS SAAS (FICHA TÉCNICA) ──────────────────────────────────────────
   report.modules.forEach((mod, i) => {
-    if (y > H - 55) { doc.addPage(); y = 20 }
+    doc.addPage()
+    y = 20
 
-    doc.setFillColor(...LIGHT_BLUE)
-    doc.roundedRect(15, y, W - 30, 32, 3, 3, 'F')
+    // Módulo Header
+    doc.setFillColor(...BRAND_BLUE)
+    doc.roundedRect(15, y, W - 30, 16, 2, 2, 'F')
 
     doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
-    doc.setTextColor(...BRAND_BLUE)
-    doc.text(t(`${i + 1}. ${mod.name}`), 20, y + 10)
+    doc.setFontSize(16)
+    doc.setTextColor(255, 255, 255)
+    doc.text(t(`Modulo ${i + 1}: ${mod.name}`), 20, y + 11)
 
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(9)
+    y += 26
+
+    // Tiempos y dificultad
+    if (mod.timeToImplement) {
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      doc.setTextColor(...DARK)
+      doc.text(t(`Tiempo estimado implantacion: ${mod.timeToImplement}`), 15, y)
+      doc.text(t(`Dificultad adaptacion: ${mod.difficulty}`), 105, y)
+      y += 10
+    }
+
+    // Objetivo y Descripción
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(12)
+    doc.setTextColor(...DARK)
+    doc.text('Objetivo Empresarial a Alcanzar', 15, y)
+    y += 6
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(10)
     doc.setTextColor(...GRAY)
-    const descLines = doc.splitTextToSize(t(mod.description), W - 45)
-    doc.text(descLines, 20, y + 18)
+    const descLines = doc.splitTextToSize(t(mod.description), W - 30)
+    doc.text(descLines, 15, y)
+    y += descLines.length * 5 + 6
 
-    y += 37
+    // Funcionalidades Requeridas
+    if (mod.features && mod.features.length) {
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.setTextColor(...DARK)
+      doc.text('Alcance de la Estructura de Software en Arquitectura', 15, y)
+      y += 6
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(10)
+      mod.features.forEach(f => {
+        const line = doc.splitTextToSize(t(`- ${f}`), W - 30)
+        doc.text(line, 15, y)
+        y += line.length * 5 + 1
+      })
+      y += 8
+    }
+
+    // Roadmap Paso a Paso
+    if (mod.steps && mod.steps.length) {
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(12)
+      doc.setTextColor(...DARK)
+      doc.text('Metodologia de Desarrollo y Puesta en Marcha Propuesta', 15, y)
+      y += 6
+
+      mod.steps.forEach(step => {
+        if (y > H - 30) {
+          doc.addPage()
+          y = 20
+        }
+        doc.setFillColor(...LIGHT_GRAY)
+        const textLines = doc.splitTextToSize(t(step), W - 36)
+        const rectH = textLines.length * 5 + 6
+
+        doc.roundedRect(15, y, W - 30, rectH, 2, 2, 'F')
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(10)
+        doc.setTextColor(...DARK)
+        doc.text(textLines, 18, y + 6)
+        y += rectH + 4
+      })
+    }
   })
 
   // ── PRÓXIMOS PASOS ────────────────────────────────────────────────────────
